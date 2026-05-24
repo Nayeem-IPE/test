@@ -117,137 +117,8 @@
          * doesn't jump when content is revealed.
          */
         .section-lazy {
-            /* content-visibility: auto removed — it prevented IntersectionObserver
-               from firing inside these sections and hid dynamically-rendered content */
-        }
-
-        /* ===== DASHBOARD ANIMATIONS ===== */
-
-        /* Scroll-reveal: pure CSS animation, no JS observer dependency.
-           Elements are never stuck at opacity:0 — the animation runs once on load
-           and elements are fully visible after it completes. */
-        @keyframes revealEntry {
-            from { opacity: 0; transform: translateY(22px); }
-            to   { opacity: 1; transform: translateY(0);    }
-        }
-        .reveal          { animation: revealEntry .55s cubic-bezier(.4,0,.2,1) both; }
-        .reveal-delay-1  { animation-delay: .07s; }
-        .reveal-delay-2  { animation-delay: .14s; }
-        .reveal-delay-3  { animation-delay: .21s; }
-        .reveal-delay-4  { animation-delay: .28s; }
-
-        /* Animated gradient text for section headings */
-        .gradient-title {
-            background: linear-gradient(90deg, #e2e8f0 0%, #818cf8 40%, #a78bfa 70%, #e2e8f0 100%);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 4s linear infinite;
-        }
-        @keyframes gradientShift {
-            0%   { background-position: 0%   center; }
-            100% { background-position: 200% center; }
-        }
-
-        /* Animated gradient divider */
-        .grad-divider {
-            height: 1px;
-            border: none;
-            background: linear-gradient(90deg, transparent, #6366f1 30%, #a78bfa 50%, #34d399 70%, transparent);
-            background-size: 200% auto;
-            animation: gradientShift 3s linear infinite;
-            opacity: .5;
-            margin: 2.5rem 0;
-        }
-
-        /* KPI card floating glow blob */
-        .card-blob {
-            position: absolute;
-            width: 130px; height: 130px;
-            border-radius: 50%;
-            filter: blur(50px);
-            pointer-events: none;
-            opacity: 0;
-            bottom: -40px; right: -30px;
-            transition: opacity .5s ease, transform .5s ease;
-        }
-        .animate-card:hover .card-blob { opacity: .18; transform: scale(1.2); }
-
-        /* Card inner shine sweep on hover */
-        .card-shine {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.04) 50%, transparent 60%);
-            background-size: 200% 100%;
-            background-position: 200% 0;
-            transition: background-position .5s ease;
-            pointer-events: none;
-            border-radius: inherit;
-        }
-        .animate-card:hover .card-shine { background-position: -100% 0; }
-
-        /* Glowing card border on hover (colour variants) */
-        .card-glow-indigo:hover  { box-shadow: 0 0 0 1px rgba(99,102,241,.4), 0 20px 30px -8px rgba(99,102,241,.2); border-color: rgba(99,102,241,.5) !important; }
-        .card-glow-emerald:hover { box-shadow: 0 0 0 1px rgba(52,211,153,.4), 0 20px 30px -8px rgba(52,211,153,.2); border-color: rgba(52,211,153,.5) !important; }
-        .card-glow-amber:hover   { box-shadow: 0 0 0 1px rgba(251,191,36,.4),  0 20px 30px -8px rgba(251,191,36,.2);  border-color: rgba(251,191,36,.5)  !important; }
-        .card-glow-rose:hover    { box-shadow: 0 0 0 1px rgba(251,113,133,.4), 0 20px 30px -8px rgba(251,113,133,.2); border-color: rgba(251,113,133,.5) !important; }
-        .card-glow-violet:hover  { box-shadow: 0 0 0 1px rgba(167,139,250,.4), 0 20px 30px -8px rgba(167,139,250,.2); border-color: rgba(167,139,250,.5) !important; }
-        .card-glow-slate:hover   { box-shadow: 0 0 0 1px rgba(148,163,184,.3), 0 20px 30px -8px rgba(148,163,184,.15); border-color: rgba(148,163,184,.4) !important; }
-
-        /* Animated top accent bar on card hover */
-        .card-top-bar {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 3px;
-            background-size: 200% auto;
-            animation: gradientShift 2.5s linear infinite paused;
-        }
-        .animate-card:hover .card-top-bar { animation-play-state: running; }
-
-        /* Table row left-accent — uses box-shadow inset so it never affects column layout.
-           position:relative + ::before on <tr> is not well-supported and shifts columns. */
-        .table-row-accent {
-            transition: box-shadow .2s ease;
-        }
-        .table-row-accent:hover {
-            box-shadow: inset 3px 0 0 #818cf8;
-        }
-
-        /* Header logo ring pulse */
-        @keyframes logoPulse {
-            0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.4); }
-            50%      { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
-        }
-        .logo-pulse { animation: logoPulse 2.8s ease-in-out infinite; }
-
-        /* Live clock tick dot */
-        @keyframes clockTick {
-            0%,49% { opacity:1; }
-            50%,100%{ opacity:0; }
-        }
-        .clock-tick { animation: clockTick 1s step-end infinite; }
-
-        /* Subtle animated dot-grid on main background */
-        @keyframes gridDrift {
-            0%   { background-position: 0 0; }
-            100% { background-position: 30px 30px; }
-        }
-        .bg-dot-grid {
-            background-image: radial-gradient(circle, rgba(99,102,241,.08) 1px, transparent 1px);
-            background-size: 28px 28px;
-            animation: gridDrift 8s linear infinite;
-        }
-
-        /* Section heading icon bounce */
-        @keyframes iconBounce {
-            0%,100% { transform: translateY(0); }
-            50%      { transform: translateY(-3px); }
-        }
-        .section-icon { animation: iconBounce 3s ease-in-out infinite; }
-
-        /* Status card count number pop */
-            0%   { transform: scale(.7); opacity:0; }
-            70%  { transform: scale(1.08); }
-            100% { transform: scale(1);   opacity:1; }
+            content-visibility: auto;
+            contain-intrinsic-size: 0 600px;
         }
 
         /* ===== LOADER ANIMATIONS ===== */
@@ -270,10 +141,6 @@
         @keyframes loaderFadeUp {
             from { opacity:0; transform:translateY(10px); }
             to   { opacity:1; transform:translateY(0);    }
-        }
-        @keyframes loaderDot {
-            0%,80%,100% { transform:scale(0.6); opacity:.3; }
-            40%          { transform:scale(1.2); opacity:1;  }
         }
         @keyframes loaderFloat {
             0%,100% { transform:translateY(0)   rotate(0deg);   opacity:.6; }
@@ -498,11 +365,11 @@
         })();
     </script>
 
-    <main class="flex-1 overflow-y-auto relative scroll-smooth w-full bg-dot-grid">
+    <main class="flex-1 overflow-y-auto relative scroll-smooth w-full">
         
         <header class="sticky-header-optimized sticky top-0 bg-akij-darkbg/85 backdrop-blur-xl z-30 px-8 py-5 border-b border-akij-borderc flex justify-between items-center transition-colors duration-300 shadow-sm">
             <div class="flex items-center gap-4">
-                <div class="w-11 h-11 bg-gradient-to-tr from-indigo-600 to-akij-violet rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 relative overflow-hidden group border border-indigo-400/30 logo-pulse">
+                <div class="w-11 h-11 bg-gradient-to-tr from-indigo-600 to-akij-violet rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 relative overflow-hidden group border border-indigo-400/30">
                     <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                     <svg class="w-6 h-6 text-white relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                 </div>
@@ -511,8 +378,6 @@
                     <div class="flex items-center text-indigo-400 mt-1">
                         <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         <p class="text-[11px] font-bold tracking-wider uppercase" id="current-date">Loading date...</p>
-                        <span class="clock-tick mx-2 text-indigo-500">|</span>
-                        <p class="text-[11px] font-bold tracking-wider tabular-nums text-indigo-300" id="live-clock">--:--:--</p>
                     </div>
                 </div>
             </div>
@@ -525,21 +390,19 @@
         <div class="p-8 max-w-7xl mx-auto space-y-10">
 
             <section id="reports-section" class="space-y-6">
-                <div class="flex items-center justify-between reveal">
-                    <h2 class="text-xl font-bold flex items-center">
-                        <div class="p-1.5 bg-amber-500/10 rounded-lg mr-3 border border-amber-500/20 text-amber-500 section-icon">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-slate-100 flex items-center">
+                        <div class="p-1.5 bg-amber-500/10 rounded-lg mr-3 border border-amber-500/20 text-amber-500">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                         </div>
-                        <span class="gradient-title">Performance Report (MTD)</span>
+                        Performance Report (MTD)
                     </h2>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
                     
-                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card card-glow-slate flex flex-col justify-between relative overflow-hidden group hover:bg-slate-800/80 reveal reveal-delay-1">
-                        <div class="card-top-bar bg-gradient-to-r from-slate-400 to-slate-500"></div>
-                        <div class="card-shine"></div>
-                        <div class="card-blob" style="background:#94a3b8;"></div>
+                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card flex flex-col justify-between relative overflow-hidden group hover:bg-slate-800/80">
+                        <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-slate-400 to-slate-500"></div>
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <div class="flex items-center text-slate-400 font-semibold text-sm uppercase tracking-wider">
@@ -558,10 +421,8 @@
                         </div>
                     </div>
 
-                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card card-glow-indigo flex flex-col justify-between relative overflow-hidden group hover:bg-slate-800/80 reveal reveal-delay-2">
-                        <div class="card-top-bar bg-gradient-to-r from-indigo-400 to-indigo-600"></div>
-                        <div class="card-shine"></div>
-                        <div class="card-blob" style="background:#818cf8;"></div>
+                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card flex flex-col justify-between relative overflow-hidden group hover:bg-slate-800/80">
+                        <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-400 to-indigo-600"></div>
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <div class="flex items-center text-indigo-400 font-semibold text-sm uppercase tracking-wider">
@@ -580,10 +441,8 @@
                         </div>
                     </div>
 
-                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card card-glow-emerald flex flex-col justify-between relative overflow-hidden group hover:bg-slate-800/80 reveal reveal-delay-3">
-                        <div class="card-top-bar bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
-                        <div class="card-shine"></div>
-                        <div class="card-blob" style="background:#34d399;"></div>
+                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card flex flex-col justify-between relative overflow-hidden group hover:bg-slate-800/80">
+                        <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <div class="flex items-center text-emerald-400 font-semibold text-sm uppercase tracking-wider">
@@ -606,18 +465,18 @@
                     </div>
                 </div>
 
-                <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card card-glow-indigo w-full reveal">
+                <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card w-full">
                     <div class="flex items-center text-sm font-semibold text-slate-300 mb-6 uppercase tracking-wide">
                         <svg class="w-4 h-4 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                        <span class="gradient-title">Overall Achievement Progress</span>
+                        Overall Achievement Progress
                     </div>
                     <div class="space-y-6 w-full" id="progress-container"></div>
                 </div>
 
-                <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card card-glow-violet w-full reveal">
+                <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card w-full">
                     <div class="flex items-center text-sm font-semibold text-slate-300 mb-6 uppercase tracking-wide">
                         <svg class="w-4 h-4 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                        <span class="gradient-title">Target vs Achievement</span>
+                        Target vs Achievement
                     </div>
                     <div class="relative w-full h-[360px]">
                         <canvas id="performanceChart"></canvas>
@@ -654,15 +513,15 @@
                 </div>
             </section>
 
-            <hr class="grad-divider">
+            <hr class="border-slate-700">
 
             <section class="space-y-6 section-lazy">
-                <div class="flex items-center justify-between reveal">
-                    <h2 class="text-xl font-bold flex items-center">
-                        <div class="p-1.5 bg-emerald-500/10 rounded-lg mr-3 border border-emerald-500/20 text-emerald-400 shadow-neon-emerald section-icon">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-slate-100 flex items-center">
+                        <div class="p-1.5 bg-emerald-500/10 rounded-lg mr-3 border border-emerald-500/20 text-emerald-400 shadow-neon-emerald">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                         </div>
-                        <span class="gradient-title">Today's Agenda</span>
+                        Today's Agenda
                     </h2>
                 </div>
 
@@ -676,62 +535,58 @@
                 </div>
             </section>
 
-            <hr class="grad-divider">
+            <hr class="border-slate-700">
 
             <section id="agenda-section" class="space-y-6 section-lazy">
-                <div class="flex items-center justify-between reveal">
-                    <h2 class="text-xl font-bold flex items-center">
-                        <div class="p-1.5 bg-indigo-500/10 rounded-lg mr-3 border border-indigo-500/20 text-indigo-400 shadow-neon-indigo section-icon">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-slate-100 flex items-center">
+                        <div class="p-1.5 bg-indigo-500/10 rounded-lg mr-3 border border-indigo-500/20 text-indigo-400 shadow-neon-indigo">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
                         </div>
-                        <span class="gradient-title">Daily Agenda Status</span>
+                        Daily Agenda Status
                     </h2>
                 </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card card-glow-slate relative overflow-hidden group hover:bg-slate-800/80 reveal reveal-delay-1">
-                        <div class="card-top-bar bg-gradient-to-r from-slate-400 to-slate-500"></div>
-                        <div class="card-shine"></div>
-                        <div class="card-blob" style="background:#94a3b8;"></div>
+                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card relative overflow-hidden group hover:bg-slate-800/80">
+                        <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-slate-400 to-slate-500"></div>
                         <h3 class="text-slate-400 font-semibold text-sm uppercase tracking-wider mb-2 flex items-center"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Initiated</h3>
                         <div class="flex items-end justify-between">
                             <div class="flex items-end space-x-3">
+                                <span class="text-4xl font-extrabold text-white tracking-tight" id="card-initiated">-</span>
                                 <span class="text-sm text-slate-400 mb-1 font-medium">tasks</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card card-glow-amber relative overflow-hidden group hover:bg-slate-800/80 reveal reveal-delay-2">
-                        <div class="card-top-bar bg-gradient-to-r from-akij-amber to-yellow-500"></div>
-                        <div class="card-shine"></div>
-                        <div class="card-blob" style="background:#fbbf24;"></div>
+                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card relative overflow-hidden group hover:bg-slate-800/80">
+                        <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-akij-amber to-yellow-500"></div>
                         <h3 class="text-amber-500 font-semibold text-sm uppercase tracking-wider mb-2 flex items-center"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> In Progress</h3>
                         <div class="flex items-end justify-between">
                             <div class="flex items-end space-x-3">
+                                <span class="text-4xl font-extrabold text-akij-amber tracking-tight" id="card-inprogress">-</span>
                                 <span class="text-sm text-amber-500/80 mb-1 font-medium">active</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card card-glow-emerald relative overflow-hidden group hover:bg-slate-800/80 reveal reveal-delay-3">
-                        <div class="card-top-bar bg-gradient-to-r from-akij-emerald to-teal-500"></div>
-                        <div class="card-shine"></div>
-                        <div class="card-blob" style="background:#34d399;"></div>
+                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card relative overflow-hidden group hover:bg-slate-800/80">
+                        <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-akij-emerald to-teal-500"></div>
                         <h3 class="text-emerald-400 font-semibold text-sm uppercase tracking-wider mb-2 flex items-center"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Completed</h3>
                         <div class="flex items-end justify-between">
                             <div class="flex items-end space-x-3">
+                                <span class="text-4xl font-extrabold text-akij-emerald tracking-tight" id="card-completed">-</span>
                                 <span class="text-sm text-emerald-400/80 mb-1 font-medium">finished</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card card-glow-rose relative overflow-hidden group hover:bg-slate-800/80 reveal reveal-delay-4">
-                        <div class="card-top-bar bg-gradient-to-r from-akij-rose to-rose-600"></div>
-                        <div class="card-shine"></div>
-                        <div class="card-blob" style="background:#fb7185;"></div>
+                    <div class="bg-akij-cardbg border border-akij-borderc rounded-2xl p-6 shadow-glass animate-card relative overflow-hidden group hover:bg-slate-800/80">
+                        <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-akij-rose to-rose-600"></div>
                         <h3 class="text-rose-400 font-semibold text-sm uppercase tracking-wider mb-2 flex items-center"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77(1.333).192 3 1.732 3z"></path></svg> Unexplained</h3>
                         <div class="flex items-end justify-between">
                             <div class="flex items-end space-x-3">
+                                <span class="text-4xl font-extrabold text-akij-rose tracking-tight" id="card-unexplained">-</span>
                                 <span class="text-sm text-rose-400/80 mb-1 font-medium">review</span>
                             </div>
                         </div>
@@ -848,41 +703,37 @@
         }
 
         async function initDashboard() {
-            try {
-                const URL_AGENDA_STATUS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=764850466&single=true&output=csv";
-                const URL_TODAYS_AGENDA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=1681197776&single=true&output=csv";
-                const URL_REPORTS_TABLE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=883381427&single=true&output=csv";
-                const URL_REPORTS_GRAPH = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=1408967296&single=true&output=csv";
-                const URL_ALL_AGENDAS   = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=764850466&single=true&output=csv";
+            const URL_AGENDA_STATUS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=764850466&single=true&output=csv";
+            const URL_TODAYS_AGENDA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=1681197776&single=true&output=csv";
+            const URL_REPORTS_TABLE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=883381427&single=true&output=csv";
+            const URL_REPORTS_GRAPH = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=1408967296&single=true&output=csv";
+            
+            // Note: Update this if the All Agendas tab has a different gid!
+            const URL_ALL_AGENDAS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ7tTxGdPTwtKYgRMo2gi6Aip7fSnCEJNz7BUBvAp_itQe0EANFX_CLSitLwdv7-SoAYd3wSnoEifd/pub?gid=764850466&single=true&output=csv";
 
-                const [rawStatus, rawAgenda, rawTable, rawGraph, rawProgress, rawAllAgendas] = await Promise.all([
-                    fetchRawCSV(URL_AGENDA_STATUS),
-                    fetchRawCSV(URL_TODAYS_AGENDA),
-                    fetchRawCSV(URL_REPORTS_TABLE),
-                    fetchRawCSV(URL_REPORTS_GRAPH),
-                    fetchRawCSV(URL_REPORTS_TABLE),
-                    fetchRawCSV(URL_ALL_AGENDAS)
-                ]);
+            const [rawStatus, rawAgenda, rawTable, rawGraph, rawProgress, rawAllAgendas] = await Promise.all([
+                fetchRawCSV(URL_AGENDA_STATUS),
+                fetchRawCSV(URL_TODAYS_AGENDA),
+                fetchRawCSV(URL_REPORTS_TABLE), 
+                fetchRawCSV(URL_REPORTS_GRAPH), 
+                fetchRawCSV(URL_REPORTS_TABLE),
+                fetchRawCSV(URL_ALL_AGENDAS)
+            ]);
 
-                calculateRemainingDays();
-                renderSection1(mapData(rawStatus, 4));
-                renderSection2(rawAgenda);
-                renderPerformanceGraph(rawGraph);
-                renderReportTable(rawTable);
-                renderProgressBar(rawProgress);
-                renderSection3(rawAllAgendas);
+            calculateRemainingDays();
+            renderSection1(mapData(rawStatus, 4));
+            renderSection2(rawAgenda); 
+            renderPerformanceGraph(rawGraph); 
+            renderReportTable(rawTable); 
+            renderProgressBar(rawProgress); 
+            renderSection3(rawAllAgendas);
 
-            } catch (err) {
-                console.error('[Dashboard] Error during initialisation:', err);
-            } finally {
-                // Always dismiss the loader — whether data loaded, partially failed, or errored.
-                const loader = document.getElementById('loading-overlay');
-                if (loader) {
-                    const statusEl = document.getElementById('loader-status');
-                    if (statusEl && statusEl._iv) clearInterval(statusEl._iv);
-                    loader.classList.add('fade-out');
-                    setTimeout(() => loader.remove(), 800);
-                }
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                const statusEl = document.getElementById('loader-status');
+                if (statusEl && statusEl._iv) clearInterval(statusEl._iv);
+                loader.classList.add('fade-out');
+                setTimeout(() => loader.remove(), 800);
             }
         }
 
@@ -987,7 +838,7 @@
                 const frag = document.createDocumentFragment();
                 filteredRows.forEach((row, rIdx) => {
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-700/30 transition-colors duration-100 border-b border-slate-700/50 list-item-entry table-row-accent";
+                    tr.className = "hover:bg-slate-700/30 transition-colors duration-100 border-b border-slate-700/50 list-item-entry";
                     // Cap stagger delay at 20 rows
                     tr.style.animationDelay = `${Math.min(rIdx, 20) * 12}ms`;
 
@@ -1246,7 +1097,7 @@
             const frag = document.createDocumentFragment();
             mapped.forEach((row, rIdx) => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-700/40 list-item-entry transition-colors duration-150 border-b border-slate-700 table-row-accent";
+                tr.className = "hover:bg-slate-700/40 list-item-entry transition-colors duration-150 border-b border-slate-700";
                 // Cap stagger delay at 20 rows
                 tr.style.animationDelay = `${Math.min(rIdx, 20) * 25}ms`;
 
@@ -1348,7 +1199,7 @@
                 const varDisplay = varianceNum === 0 ? "0" : varianceNum.toLocaleString();
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-700/40 list-item-entry border-b border-slate-700/60 table-row-accent";
+                tr.className = "hover:bg-slate-700/40 list-item-entry border-b border-slate-700/60";
                 // Cap stagger delay at 20 rows
                 tr.style.animationDelay = `${Math.min(visibleIdx, 20) * 15}ms`;
                 visibleIdx++;
@@ -1635,38 +1486,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', initDashboard);
-
-        // Safety net: if initDashboard never fires (e.g. script error before DOMContentLoaded),
-        // force-dismiss the loader after 15 s so the page is never permanently blocked.
-        setTimeout(() => {
-            const loader = document.getElementById('loading-overlay');
-            if (loader) {
-                const statusEl = document.getElementById('loader-status');
-                if (statusEl && statusEl._iv) clearInterval(statusEl._iv);
-                loader.classList.add('fade-out');
-                setTimeout(() => loader.remove(), 800);
-            }
-        }, 15000);
-    </script>
-
-    <script>
-    /* ======================================================
-       DASHBOARD ANIMATION RUNTIME
-       - Live clock
-       - Scroll-reveal (IntersectionObserver)
-       - Count-up for stat cards
-    ====================================================== */
-
-    // ── 1. Live clock ──────────────────────────────────────
-    function tickClock() {
-        const el = document.getElementById('live-clock');
-        if (!el) return;
-        const now = new Date();
-        el.textContent = now.toLocaleTimeString('en-US', { hour12: false });
-    }
-    tickClock();
-    setInterval(tickClock, 1000);
-
     </script>
 </body>
 </html>
