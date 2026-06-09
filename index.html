@@ -3,387 +3,255 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OEE Analytics Engine</title>
+<title>ALEL — OEE Analytics Engine</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════ RESET & BASE ═══════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: #F0F4F8;
-  color: #111827;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Clean light page background — no dark overlays */
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+/* ═══════ RESET ═══════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:#F0F4F8;color:#111827;min-height:100vh;overflow-x:hidden;}
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:
-    radial-gradient(ellipse 65% 50% at 0% 0%,   rgba(199,210,254,.45) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(167,243,208,.3)  0%, transparent 60%),
+    radial-gradient(ellipse 65% 50% at 0% 0%,rgba(199,210,254,.45) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 100% 100%,rgba(167,243,208,.3) 0%,transparent 60%),
     #F0F4F8;
 }
 
-/* ═══════════════════════ LOADING SCREEN ═══════════════════════ */
-#loadingScreen {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #ffffff;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 0;
-  transition: opacity .6s ease, visibility .6s ease;
+/* ═══════ LOADING SCREEN ═══════ */
+#loadingScreen{
+  position:fixed;inset:0;z-index:9999;background:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .6s ease,visibility .6s ease;
 }
-#loadingScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-
-/* Soft corner washes — no dark elements */
-#loadingScreen::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
+#loadingScreen.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+#loadingScreen::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
   background:
-    radial-gradient(ellipse 55% 45% at 5%  5%,  rgba(199,210,254,.5) 0%, transparent 55%),
-    radial-gradient(ellipse 45% 38% at 95% 95%, rgba(167,243,208,.35) 0%, transparent 55%);
+    radial-gradient(ellipse 55% 45% at 5% 5%,rgba(199,210,254,.5) 0%,transparent 55%),
+    radial-gradient(ellipse 45% 38% at 95% 95%,rgba(167,243,208,.35) 0%,transparent 55%);
 }
+.ls-logo-wrap{position:relative;z-index:2;margin-bottom:28px;}
+.ls-logo-card{
+  width:80px;height:80px;border-radius:22px;
+  background:linear-gradient(145deg,#6366F1,#818CF8);
+  box-shadow:0 8px 24px rgba(99,102,241,.25),0 2px 6px rgba(99,102,241,.15);
+  display:flex;align-items:center;justify-content:center;
+  animation:logoBreath 3.2s ease-in-out infinite;
+}
+@keyframes logoBreath{0%,100%{transform:scale(1);box-shadow:0 8px 24px rgba(99,102,241,.25);}50%{transform:scale(1.04);box-shadow:0 12px 32px rgba(99,102,241,.35);}}
+.ls-spin-ring{position:absolute;inset:-14px;border-radius:50%;border:3px solid #E0E7FF;border-top-color:#6366F1;border-right-color:#818CF8;animation:spinRing 1.4s cubic-bezier(.55,.15,.45,.85) infinite;}
+.ls-spin-ring2{position:absolute;inset:-24px;border-radius:50%;border:2px solid #EDE9FE;border-bottom-color:#A5B4FC;animation:spinRing 2.2s linear infinite reverse;}
+@keyframes spinRing{to{transform:rotate(360deg);}}
+.ls-company{position:relative;z-index:2;font-size:20px;font-weight:800;letter-spacing:-.025em;color:#111827;margin-bottom:4px;text-align:center;}
+.ls-division{position:relative;z-index:2;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B7280;margin-bottom:32px;text-align:center;}
+.ls-bar-wrap{position:relative;z-index:2;width:240px;margin-bottom:14px;}
+.ls-bar-track{height:4px;background:#E5E7EB;border-radius:99px;overflow:hidden;}
+.ls-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#6366F1,#818CF8,#A5B4FC);background-size:200% 100%;border-radius:99px;transition:width .4s ease;animation:barShimmer 1.8s linear infinite;}
+@keyframes barShimmer{0%{background-position:0%;}100%{background-position:200%;}}
+.ls-status-text{position:relative;z-index:2;font-size:12px;font-weight:500;color:#6B7280;min-height:18px;}
+.ls-dots span{display:inline-block;animation:dotPop .9s ease-in-out infinite both;}
+.ls-dots span:nth-child(2){animation-delay:.15s;}.ls-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes dotPop{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
+.ls-footer{position:absolute;bottom:24px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#C7D2FE;}
 
-/* Logo card */
-.ls-logo-wrap {
-  position: relative; z-index: 2;
-  margin-bottom: 32px;
-}
-.ls-logo-card {
-  width: 80px; height: 80px;
-  border-radius: 22px;
-  background: linear-gradient(145deg, #6366F1 0%, #818CF8 100%);
-  box-shadow: 0 8px 24px rgba(99,102,241,.25), 0 2px 6px rgba(99,102,241,.15);
-  display: flex; align-items: center; justify-content: center;
-  animation: logoBreath 3.2s ease-in-out infinite;
-}
-@keyframes logoBreath {
-  0%,100% { transform: scale(1);     box-shadow: 0 8px 24px rgba(99,102,241,.25), 0 2px 6px rgba(99,102,241,.15); }
-  50%      { transform: scale(1.04); box-shadow: 0 12px 32px rgba(99,102,241,.35), 0 4px 10px rgba(99,102,241,.2); }
-}
+/* ═══════ HEADER ═══════ */
+header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #E5E7EB;box-shadow:0 1px 4px rgba(17,24,39,.06);}
+.header-logo-box{width:38px;height:38px;border-radius:11px;flex-shrink:0;background:linear-gradient(145deg,#6366F1,#818CF8);box-shadow:0 3px 10px rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;}
+.header-company{font-size:15px;font-weight:800;letter-spacing:-.02em;color:#111827;}
+.header-subtitle{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#9CA3AF;margin-top:1px;}
 
-/* Spinner ring around logo */
-.ls-spinner-ring {
-  position: absolute;
-  inset: -14px;
-  border-radius: 50%;
-  border: 3px solid #E0E7FF;
-  border-top-color: #6366F1;
-  border-right-color: #818CF8;
-  animation: spinRing 1.4s cubic-bezier(.55,.15,.45,.85) infinite;
-}
-.ls-spinner-ring2 {
-  position: absolute;
-  inset: -24px;
-  border-radius: 50%;
-  border: 2px solid #EDE9FE;
-  border-bottom-color: #A5B4FC;
-  animation: spinRing 2.2s linear infinite reverse;
-}
-@keyframes spinRing { to { transform: rotate(360deg); } }
+/* ═══════ CARDS ═══════ */
+.card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:0 1px 3px rgba(17,24,39,.06),0 1px 2px rgba(17,24,39,.04);transition:box-shadow .2s,transform .2s,border-color .2s;}
+.card:hover{box-shadow:0 6px 20px rgba(99,102,241,.12),0 2px 6px rgba(17,24,39,.06);border-color:#C7D2FE;transform:translateY(-2px);}
+.card-flat{background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:0 1px 3px rgba(17,24,39,.06),0 1px 2px rgba(17,24,39,.04);}
+.accent-indigo{border-top:3px solid #6366F1;}.accent-blue{border-top:3px solid #3B82F6;}
+.accent-amber{border-top:3px solid #F59E0B;}.accent-teal{border-top:3px solid #14B8A6;}.accent-orange{border-top:3px solid #F97316;}
 
-/* Loading text */
-.ls-company {
-  position: relative; z-index: 2;
-  font-size: 20px; font-weight: 800;
-  letter-spacing: -.025em; color: #111827;
-  margin-bottom: 4px; text-align: center;
-}
-.ls-division {
-  position: relative; z-index: 2;
-  font-size: 11px; font-weight: 600;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: #6B7280; margin-bottom: 36px; text-align: center;
-}
+/* ═══════ TYPOGRAPHY ═══════ */
+.label{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7280;}
+.kpi-value{font-family:'JetBrains Mono',monospace;font-weight:700;color:#111827;margin-top:6px;line-height:1;}
+.g-indigo{background:linear-gradient(135deg,#4338CA,#6366F1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.g-blue{background:linear-gradient(135deg,#1D4ED8,#3B82F6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.g-amber{background:linear-gradient(135deg,#92400E,#D97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.g-teal{background:linear-gradient(135deg,#0F766E,#14B8A6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.mono{font-family:'JetBrains Mono',monospace;}
 
-/* Progress track */
-.ls-bar-wrap {
-  position: relative; z-index: 2;
-  width: 240px; margin-bottom: 14px;
-}
-.ls-bar-track {
-  height: 4px; background: #E5E7EB;
-  border-radius: 99px; overflow: hidden;
-}
-.ls-bar-fill {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, #6366F1, #818CF8, #A5B4FC);
-  background-size: 200% 100%;
-  border-radius: 99px;
-  transition: width .4s ease;
-  animation: barShimmer 1.8s linear infinite;
-}
-@keyframes barShimmer {
-  0%   { background-position: 0% 0%; }
-  100% { background-position: 200% 0%; }
-}
+/* ═══════ ICON BADGES ═══════ */
+.ib{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+.ib-indigo{background:#EEF2FF;color:#4338CA;}.ib-blue{background:#EFF6FF;color:#1D4ED8;}
+.ib-violet{background:#F5F3FF;color:#6D28D9;}.ib-emerald{background:#ECFDF5;color:#065F46;}
+.ib-amber{background:#FFFBEB;color:#92400E;}.ib-rose{background:#FFF1F2;color:#9F1239;}
+.ib-teal{background:#F0FDFA;color:#0F766E;}.ib-orange{background:#FFF7ED;color:#9A3412;}
 
-/* Status text */
-.ls-status-text {
-  position: relative; z-index: 2;
-  font-size: 12px; font-weight: 500; color: #6B7280;
-  letter-spacing: .01em; min-height: 18px;
-}
-.ls-dots span {
-  display: inline-block;
-  animation: dotPop .9s ease-in-out infinite both;
-}
-.ls-dots span:nth-child(2) { animation-delay: .15s; }
-.ls-dots span:nth-child(3) { animation-delay: .30s; }
-@keyframes dotPop { 0%,80%,100% { opacity: .2; } 40% { opacity: 1; } }
+/* ═══════ PROGRESS ═══════ */
+.prog-track{width:100%;height:5px;background:#E5E7EB;border-radius:99px;overflow:hidden;margin-top:10px;}
+.prog-fill{height:100%;border-radius:99px;transition:width .9s cubic-bezier(.4,0,.2,1);}
 
-/* Footer ticker */
-.ls-footer {
-  position: absolute; bottom: 24px;
-  font-size: 10px; font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase;
-  color: #C7D2FE;
+/* ═══════ FILTER BAR ═══════ */
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;}
+.filter-sep{width:1px;height:20px;background:#E5E7EB;flex-shrink:0;margin:0 2px;}
+.f-select{
+  appearance:none;
+  background:#F9FAFB url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236B7280'/%3E%3C/svg%3E") no-repeat right 9px center;
+  border:1.5px solid #D1D5DB;border-radius:9px;
+  color:#111827;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  padding:8px 28px 8px 12px;outline:none;cursor:pointer;white-space:nowrap;
+  transition:border-color .15s,box-shadow .15s;
 }
+.f-select:focus{border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+.f-select:hover{border-color:#A5B4FC;background-color:#F5F3FF;}
+.f-select option{background:#fff;color:#111827;}
+.btn-reset{display:inline-flex;align-items:center;gap:5px;background:#F9FAFB;border:1.5px solid #D1D5DB;border-radius:9px;color:#374151;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.btn-reset:hover{background:#EEF2FF;border-color:#A5B4FC;color:#4338CA;}
+.btn-refresh{display:inline-flex;align-items:center;gap:6px;background:#6366F1;border:1.5px solid #4F46E5;border-radius:9px;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.btn-refresh:hover{background:#4F46E5;border-color:#4338CA;}
+.btn-refresh:active{transform:scale(.97);}
+.btn-refresh.spinning i{animation:spinRing 1s linear infinite;}
 
-/* ═══════════════════════ HEADER ═══════════════════════ */
-header {
-  position: sticky; top: 0; z-index: 50;
-  background: #ffffff;
-  border-bottom: 1px solid #E5E7EB;
-  box-shadow: 0 1px 4px rgba(17,24,39,.06);
+/* ═══════ CALENDAR PICKER ═══════ */
+.cal-wrap{position:relative;display:inline-block;}
+.cal-trigger{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#F9FAFB;border:1.5px solid #D1D5DB;border-radius:9px;
+  color:#111827;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  padding:8px 14px;cursor:pointer;white-space:nowrap;user-select:none;
+  transition:all .15s;
 }
-.header-logo-box {
-  width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
-  background: linear-gradient(145deg, #6366F1, #818CF8);
-  box-shadow: 0 3px 10px rgba(99,102,241,.3);
-  display: flex; align-items: center; justify-content: center;
-}
-.header-company  { font-size: 15px; font-weight: 800; letter-spacing: -.02em; color: #111827; }
-.header-subtitle { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #9CA3AF; margin-top: 1px; }
+.cal-trigger:hover,.cal-trigger.open{border-color:#6366F1;background:#EEF2FF;color:#4338CA;box-shadow:0 0 0 3px rgba(99,102,241,.1);}
+.cal-trigger .cal-chevron{font-size:9px;color:#9CA3AF;transition:transform .2s;}
+.cal-trigger.open .cal-chevron{transform:rotate(180deg);}
 
-/* ═══════════════════════ CARDS ═══════════════════════ */
-.card {
-  background: #ffffff;
-  border: 1px solid #E5E7EB;
-  border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(17,24,39,.06), 0 1px 2px rgba(17,24,39,.04);
-  transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+.cal-dropdown{
+  position:fixed;top:0;left:0;z-index:9998;
+  background:#fff;border:1px solid #E5E7EB;border-radius:20px;
+  box-shadow:0 24px 64px rgba(17,24,39,.14),0 6px 20px rgba(99,102,241,.09);
+  padding:20px;width:310px;
+  display:none;
 }
-.card:hover {
-  box-shadow: 0 6px 20px rgba(99,102,241,.12), 0 2px 6px rgba(17,24,39,.06);
-  border-color: #C7D2FE;
-  transform: translateY(-2px);
-}
-.card-flat {
-  background: #ffffff;
-  border: 1px solid #E5E7EB;
-  border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(17,24,39,.06), 0 1px 2px rgba(17,24,39,.04);
-}
+.cal-dropdown.open{display:block;animation:calDrop .22s cubic-bezier(.22,1,.36,1);}
+@keyframes calDrop{from{opacity:0;transform:translateY(-10px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
 
-/* Accent top borders */
-.accent-indigo { border-top: 3px solid #6366F1; }
-.accent-blue   { border-top: 3px solid #3B82F6; }
-.accent-amber  { border-top: 3px solid #F59E0B; }
-.accent-teal   { border-top: 3px solid #14B8A6; }
-.accent-orange { border-top: 3px solid #F97316; }
+/* Nav row */
+.cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cal-nav-btn{width:30px;height:30px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;font-size:11px;transition:background .12s;}
+.cal-nav-btn:hover{background:#E5E7EB;}
+.cal-month-lbl{font-size:14px;font-weight:800;color:#111827;letter-spacing:-.01em;}
 
-/* ═══════════════════════ TYPOGRAPHY ═══════════════════════ */
-.label {
-  font-size: 10.5px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: #6B7280;
-}
-.kpi-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 700; color: #111827;
-  margin-top: 6px; line-height: 1;
-}
-/* Gradient text for KPI values */
-.g-indigo { background: linear-gradient(135deg,#4338CA,#6366F1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.g-blue   { background: linear-gradient(135deg,#1D4ED8,#3B82F6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.g-amber  { background: linear-gradient(135deg,#92400E,#D97706); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.g-teal   { background: linear-gradient(135deg,#0F766E,#14B8A6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.mono     { font-family: 'JetBrains Mono', monospace; }
+/* Day-of-week headers */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-dow{font-size:9.5px;font-weight:700;color:#9CA3AF;text-align:center;padding:2px 0 8px;text-transform:uppercase;}
 
-/* ═══════════════════════ ICON BADGES ═══════════════════════ */
-.ib { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
-.ib-indigo  { background: #EEF2FF; color: #4338CA; }
-.ib-blue    { background: #EFF6FF; color: #1D4ED8; }
-.ib-violet  { background: #F5F3FF; color: #6D28D9; }
-.ib-emerald { background: #ECFDF5; color: #065F46; }
-.ib-amber   { background: #FFFBEB; color: #92400E; }
-.ib-rose    { background: #FFF1F2; color: #9F1239; }
-.ib-teal    { background: #F0FDFA; color: #0F766E; }
-.ib-orange  { background: #FFF7ED; color: #9A3412; }
+/* Day cells */
+.cal-day{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:12.5px;font-weight:500;color:#374151;
+  border-radius:8px;cursor:pointer;position:relative;
+  transition:background .1s,color .1s;
+}
+.cal-day:hover:not(.empty):not(.no-data){background:#EEF2FF;color:#4338CA;}
+.cal-day.empty{cursor:default;pointer-events:none;}
+.cal-day.no-data{color:#D1D5DB;cursor:not-allowed;}
 
-/* ═══════════════════════ PROGRESS BARS ═══════════════════════ */
-.prog-track { width: 100%; height: 5px; background: #E5E7EB; border-radius: 99px; overflow: hidden; margin-top: 10px; }
-.prog-fill  { height: 100%; border-radius: 99px; transition: width .9s cubic-bezier(.4,0,.2,1); }
+/* Today dot */
+.cal-day.today::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#6366F1;}
 
-/* ═══════════════════════ FILTER BAR ═══════════════════════ */
-.filter-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 9px 14px; }
-.filter-sep { width: 1px; height: 18px; background: #E5E7EB; flex-shrink: 0; margin: 0 2px; }
-.f-select {
-  appearance: none;
-  background: #F9FAFB url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236B7280'/%3E%3C/svg%3E") no-repeat right 10px center;
-  border: 1px solid #D1D5DB; border-radius: 9px;
-  color: #111827; font-family: 'Inter', sans-serif;
-  font-size: 13px; font-weight: 600;
-  padding: 8px 30px 8px 13px;
-  outline: none; cursor: pointer; white-space: nowrap;
-  transition: border-color .15s, box-shadow .15s;
-}
-.f-select option { background: #fff; color: #111827; }
-.f-select:focus  { border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
-.f-select:hover  { border-color: #A5B4FC; background-color: #F5F3FF; }
-.btn-reset {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: #F9FAFB; border: 1px solid #D1D5DB; border-radius: 9px;
-  color: #374151; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
-  padding: 8px 14px; cursor: pointer; white-space: nowrap;
-  transition: all .15s ease;
-}
-.btn-reset:hover { background: #EEF2FF; border-color: #A5B4FC; color: #4338CA; }
-.btn-refresh {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: #6366F1; border: 1px solid #4F46E5; border-radius: 9px;
-  color: #ffffff; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
-  padding: 8px 14px; cursor: pointer; white-space: nowrap;
-  transition: all .15s ease;
-}
-.btn-refresh:hover  { background: #4F46E5; border-color: #4338CA; }
-.btn-refresh:active { transform: scale(.97); }
-.btn-refresh.spinning i { animation: spinRing 1s linear infinite; }
+/* Has-data green dot */
+.cal-day.has-data::before{content:'';position:absolute;top:3px;right:3px;width:4px;height:4px;border-radius:50%;background:#10B981;}
 
-/* ═══════════════════════ SEARCH INPUT ═══════════════════════ */
-.f-search {
-  background: #F9FAFB; border: 1px solid #D1D5DB; border-radius: 9px;
-  color: #111827; font-family: 'Inter', sans-serif;
-  font-size: 12px; font-weight: 500;
-  padding: 7px 12px 7px 34px; width: 100%; outline: none;
-  transition: border-color .15s, box-shadow .15s;
-}
-.f-search::placeholder { color: #9CA3AF; }
-.f-search:focus { border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+/* Range */
+.cal-day.in-range:not(.sel-start):not(.sel-end){background:#EEF2FF;color:#4338CA;border-radius:0;}
+.cal-day.in-range.range-start-edge{border-radius:8px 0 0 8px;}
+.cal-day.in-range.range-end-edge{border-radius:0 8px 8px 0;}
+.cal-day.sel-start{background:#6366F1!important;color:#fff!important;font-weight:700;border-radius:8px 0 0 8px;}
+.cal-day.sel-end{background:#6366F1!important;color:#fff!important;font-weight:700;border-radius:0 8px 8px 0;}
+.cal-day.sel-start.sel-end{border-radius:8px!important;}
 
-/* ═══════════════════════ TABLES ═══════════════════════ */
-.dtable thead th {
-  background: #F9FAFB; color: #374151;
-  font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
-  padding: 10px 16px; border-bottom: 1px solid #E5E7EB; white-space: nowrap;
-}
-.dtable tbody tr { border-bottom: 1px solid #F3F4F6; transition: background .1s; }
-.dtable tbody tr:hover { background: #F9FAFB; }
-.dtable tbody tr:nth-child(even) { background: #FAFAFA; }
-.dtable tbody tr:nth-child(even):hover { background: #F3F4F6; }
-.dtable tbody td { padding: 10px 16px; font-size: 12.5px; color: #1F2937; }
+/* Quick buttons */
+.cal-quick-row{display:flex;gap:5px;margin-top:14px;flex-wrap:wrap;}
+.cal-qbtn{flex:1;min-width:0;padding:6px 4px;border-radius:8px;background:#F3F4F6;border:1px solid #E5E7EB;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#374151;cursor:pointer;transition:all .12s;text-align:center;white-space:nowrap;}
+.cal-qbtn:hover{background:#EEF2FF;border-color:#C7D2FE;color:#4338CA;}
+.cal-qbtn.active{background:#EEF2FF;border-color:#6366F1;color:#4338CA;}
 
-/* ═══════════════════════ TAGS & BADGES ═══════════════════════ */
-.tag-machine {
-  display: inline-block;
-  background: #EEF2FF; border: 1px solid #C7D2FE; color: #3730A3;
-  border-radius: 5px; padding: 2px 7px; font-size: 11px; font-weight: 700; margin: 1px;
-}
-.tag-ct {
-  display: inline-block;
-  background: #ECFEFF; border: 1px solid #A5F3FC; color: #0E7490;
-  border-radius: 5px; padding: 2px 8px; font-size: 11px; font-weight: 700;
-  font-family: 'JetBrains Mono', monospace; margin: 1px;
-}
-.badge-prod {
-  background: #EEF2FF; color: #3730A3; border: 1px solid #C7D2FE;
-  border-radius: 20px; padding: 3px 12px; font-size: 11px; font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
-}
-.oee-good { background: #F0FDF4; color: #166534; border: 1px solid #86EFAC; }
-.oee-warn { background: #FEFCE8; color: #854D0E; border: 1px solid #FDE047; }
-.oee-bad  { background: #FFF1F2; color: #9F1239; border: 1px solid #FDA4AF; }
+/* Calendar selected range display */
+.cal-selected-info{margin-top:14px;padding:10px 12px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;display:none;}
+.cal-selected-info.visible{display:block;}
+.cal-selected-info p{font-size:11px;font-weight:600;color:#4C1D95;}
 
-/* ═══════════════════════ DONUT LEGEND ═══════════════════════ */
-.donut-legend { display: flex; flex-direction: column; gap: 5px; }
-.dl-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 9px; border-radius: 8px;
-  background: #F9FAFB; border: 1px solid #F3F4F6; transition: background .1s;
-}
-.dl-row:hover { background: #F3F4F6; border-color: #E5E7EB; }
-.dl-dot   { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-.dl-label { font-size: 11px; color: #374151; font-weight: 500; flex: 1; margin-left: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dl-val   { font-size: 11px; font-weight: 700; color: #111827; font-family: 'JetBrains Mono', monospace; white-space: nowrap; margin-left: 8px; }
-.dl-pct   { font-size: 10px; color: #6B7280; margin-left: 5px; font-family: 'JetBrains Mono', monospace; }
+/* ═══════ SEARCH ═══════ */
+.f-search{background:#F9FAFB;border:1.5px solid #D1D5DB;border-radius:9px;color:#111827;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:7px 12px 7px 34px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s;}
+.f-search::placeholder{color:#9CA3AF;}
+.f-search:focus{border-color:#6366F1;box-shadow:0 0 0 3px rgba(99,102,241,.1);}
 
-/* ═══════════════════════ SECTION PANEL HEADER ═══════════════════════ */
-.panel-hdr {
-  display: flex; flex-wrap: wrap; align-items: center;
-  justify-content: space-between; gap: 10px;
-  padding: 13px 18px;
-  border-bottom: 1px solid #F3F4F6;
-  background: #FAFAFA;
-  border-radius: 14px 14px 0 0;
-}
+/* ═══════ TABLES ═══════ */
+.dtable thead th{background:#F9FAFB;color:#374151;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:10px 16px;border-bottom:1px solid #E5E7EB;white-space:nowrap;}
+.dtable tbody tr{border-bottom:1px solid #F3F4F6;transition:background .1s;}
+.dtable tbody tr:hover{background:#F9FAFB;}
+.dtable tbody tr:nth-child(even){background:#FAFAFA;}
+.dtable tbody tr:nth-child(even):hover{background:#F3F4F6;}
+.dtable tbody td{padding:10px 16px;font-size:12.5px;color:#1F2937;}
 
-/* ═══════════════════════ SCROLLBAR ═══════════════════════ */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #F3F4F6; }
-::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+/* ═══════ TAGS & BADGES ═══════ */
+.tag-machine{display:inline-block;background:#EEF2FF;border:1px solid #C7D2FE;color:#3730A3;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700;margin:1px;}
+.tag-ct{display:inline-block;background:#ECFEFF;border:1px solid #A5F3FC;color:#0E7490;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;margin:1px;}
+.badge-prod{background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.oee-good{background:#F0FDF4;color:#166534;border:1px solid #86EFAC;}
+.oee-warn{background:#FEFCE8;color:#854D0E;border:1px solid #FDE047;}
+.oee-bad{background:#FFF1F2;color:#9F1239;border:1px solid #FDA4AF;}
 
-/* ═══════════════════════ ANIMATIONS ═══════════════════════ */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.fu   { animation: fadeUp .4s ease both; }
-.fu-1 { animation-delay: .06s; opacity: 0; }
-.fu-2 { animation-delay: .12s; opacity: 0; }
-.fu-3 { animation-delay: .18s; opacity: 0; }
-.fu-4 { animation-delay: .24s; opacity: 0; }
+/* ═══════ DONUT LEGEND ═══════ */
+.donut-legend{display:flex;flex-direction:column;gap:5px;}
+.dl-row{display:flex;align-items:center;justify-content:space-between;padding:5px 9px;border-radius:8px;background:#F9FAFB;border:1px solid #F3F4F6;transition:background .1s;}
+.dl-row:hover{background:#F3F4F6;border-color:#E5E7EB;}
+.dl-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
+.dl-label{font-size:11px;color:#374151;font-weight:500;flex:1;margin-left:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dl-val{font-size:11px;font-weight:700;color:#111827;font-family:'JetBrains Mono',monospace;white-space:nowrap;margin-left:8px;}
+.dl-pct{font-size:10px;color:#6B7280;margin-left:5px;font-family:'JetBrains Mono',monospace;}
+
+/* ═══════ PANEL HEADER ═══════ */
+.panel-hdr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:13px 18px;border-bottom:1px solid #F3F4F6;background:#FAFAFA;border-radius:14px 14px 0 0;}
+
+/* ═══════ SCROLLBAR ═══════ */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:#F3F4F6;}
+::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:99px;}
+::-webkit-scrollbar-thumb:hover{background:#9CA3AF;}
+
+/* ═══════ ANIMATIONS ═══════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fu{animation:fadeUp .4s ease both;}
+.fu-1{animation-delay:.06s;opacity:0;}.fu-2{animation-delay:.12s;opacity:0;}
+.fu-3{animation-delay:.18s;opacity:0;}.fu-4{animation-delay:.24s;opacity:0;}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════ LOADING SCREEN ═══════════════════════════════ -->
+<!-- ══════════ LOADING SCREEN ══════════ -->
 <div id="loadingScreen">
-  <!-- Logo -->
   <div class="ls-logo-wrap">
-    <div class="ls-logo-card">
-      <i class="fa-solid fa-industry" style="font-size:32px;color:#fff;"></i>
-    </div>
-    <div class="ls-spinner-ring"></div>
-    <div class="ls-spinner-ring2"></div>
+    <div class="ls-logo-card"><i class="fa-solid fa-industry" style="font-size:32px;color:#fff;"></i></div>
+    <div class="ls-spin-ring"></div><div class="ls-spin-ring2"></div>
   </div>
-
-  <!-- Company name -->
-  <div class="ls-company">ABC Company LTD</div>
+  <div class="ls-company">AKIJ LIGHT ENGINEERING LTD</div>
   <div class="ls-division">Injection Molding Division &middot; OEE Analytics Engine</div>
-
-  <!-- Progress bar -->
   <div class="ls-bar-wrap">
-    <div class="ls-bar-track">
-      <div class="ls-bar-fill" id="lsProgressFill"></div>
-    </div>
+    <div class="ls-bar-track"><div class="ls-bar-fill" id="lsProgressFill"></div></div>
   </div>
-
-  <!-- Status -->
-  <div class="ls-status-text" id="lsStatus">
-    Connecting to production pipeline<span class="ls-dots"><span>.</span><span>.</span><span>.</span></span>
-  </div>
-
-  <!-- Bottom ticker -->
+  <div class="ls-status-text" id="lsStatus">Connecting to production pipeline<span class="ls-dots"><span>.</span><span>.</span><span>.</span></span></div>
   <div class="ls-footer">ALEL &middot; OEE Analytics &middot; v2.0 &middot; 2026</div>
 </div>
 
-<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+<!-- ══════════ HEADER ══════════ -->
 <header>
   <div class="max-w-7xl mx-auto px-5 py-3" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
     <div style="display:flex;align-items:center;gap:12px;">
-      <div class="header-logo-box">
-        <i class="fa-solid fa-industry" style="color:#fff;font-size:17px;"></i>
-      </div>
+      <div class="header-logo-box"><i class="fa-solid fa-industry" style="color:#fff;font-size:17px;"></i></div>
       <div>
-        <div class="header-company">ABC Company</div>
+        <div class="header-company">AKIJ LIGHT ENGINEERING LTD</div>
         <div class="header-subtitle">Injection Molding Division — OEE Analytics Engine</div>
       </div>
     </div>
@@ -393,187 +261,152 @@ header {
   </div>
 </header>
 
-<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
+<!-- ══════════ MAIN ══════════ -->
 <main class="max-w-7xl mx-auto px-5 py-6 space-y-4">
 
-  <!-- ── COMPACT FILTER BAR ── -->
+  <!-- ── FILTER BAR (Calendar + Shift) ── -->
   <section class="card-flat fu">
-    <div class="filter-bar" style="padding:10px 16px;">
-      <i class="fa-solid fa-sliders" style="color:#6366F1;font-size:12px;flex-shrink:0;"></i>
-      <span class="label" style="white-space:nowrap;flex-shrink:0;">Filters</span>
+    <div class="filter-bar">
+      <i class="fa-solid fa-calendar-days" style="color:#6366F1;font-size:12px;flex-shrink:0;"></i>
+      <span class="label" style="white-space:nowrap;flex-shrink:0;">Date Range</span>
       <div class="filter-sep"></div>
-      <select id="filterYear"  class="f-select"><option value="All">All Years</option></select>
-      <select id="filterMonth" class="f-select"><option value="All">All Months</option></select>
-      <select id="filterDay"   class="f-select"><option value="All">All Days</option></select>
-      <select id="filterShift" class="f-select"><option value="All">All Shifts</option></select>
+
+      <!-- Calendar Picker -->
+      <div class="cal-wrap" id="calWrap">
+        <button class="cal-trigger" id="calTrigger" onclick="toggleCal(event)">
+          <i class="fa-regular fa-calendar" style="color:#6366F1;font-size:12px;"></i>
+          <span id="calLabel">All Dates</span>
+          <i class="fa-solid fa-chevron-down cal-chevron"></i>
+        </button>
+
+        <div class="cal-dropdown" id="calDropdown">
+          <!-- Month navigation -->
+          <div class="cal-nav-row">
+            <button class="cal-nav-btn" onclick="calNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="cal-month-lbl" id="calMonthLbl">—</span>
+            <button class="cal-nav-btn" onclick="calNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+
+          <!-- Day grid -->
+          <div class="cal-grid" id="calGrid">
+            <div class="cal-dow">Mo</div><div class="cal-dow">Tu</div><div class="cal-dow">We</div>
+            <div class="cal-dow">Th</div><div class="cal-dow">Fr</div><div class="cal-dow">Sa</div><div class="cal-dow">Su</div>
+          </div>
+
+          <!-- Quick buttons -->
+          <div class="cal-quick-row">
+            <button class="cal-qbtn" id="qToday"   onclick="calQuick('today')">Today</button>
+            <button class="cal-qbtn" id="qWeek"    onclick="calQuick('week')">This Week</button>
+            <button class="cal-qbtn" id="qMonth"   onclick="calQuick('month')">This Month</button>
+            <button class="cal-qbtn" id="qAll"     onclick="calQuick('all')">All Time</button>
+          </div>
+
+          <!-- Selected range display -->
+          <div class="cal-selected-info" id="calSelInfo">
+            <p id="calSelText"></p>
+          </div>
+        </div>
+      </div>
+
       <div class="filter-sep"></div>
-      <button onclick="resetFilters()" class="btn-reset">
-        <i class="fa-solid fa-arrow-rotate-left" style="font-size:11px;"></i>Reset
-      </button>
-      <button onclick="refreshData()" class="btn-refresh" id="btnRefresh">
-        <i class="fa-solid fa-rotate" style="font-size:11px;"></i>Refresh
-      </button>
+
+      <!-- Shift filter -->
+      <div style="display:flex;align-items:center;gap:6px;">
+        <i class="fa-solid fa-layer-group" style="color:#6B7280;font-size:11px;flex-shrink:0;"></i>
+        <select id="filterShift" class="f-select"><option value="All">All Shifts</option></select>
+      </div>
+
+      <div class="filter-sep"></div>
+      <button onclick="resetFilters()" class="btn-reset"><i class="fa-solid fa-arrow-rotate-left" style="font-size:11px;"></i>Reset</button>
+      <button onclick="refreshData()" class="btn-refresh" id="btnRefresh"><i class="fa-solid fa-rotate" style="font-size:11px;"></i>Refresh</button>
     </div>
   </section>
 
   <!-- ── OPERATIONAL MINI-CARDS ── -->
-  <section class="grid grid-cols-1 sm:grid-cols-2 gap-4 fu fu-1">
-    <div class="card" style="padding:16px;display:flex;align-items:center;gap:14px;">
+  <section class="fu fu-1">
+    <div class="card" style="padding:16px;display:flex;align-items:center;gap:14px;max-width:320px;">
       <div class="ib ib-indigo"><i class="fa-solid fa-screwdriver-wrench"></i></div>
       <div>
         <div class="label">Active Machines Run</div>
         <div id="cardMachines" class="mono" style="font-size:28px;font-weight:700;margin-top:4px;color:#111827;line-height:1;">0</div>
       </div>
     </div>
-    <div class="card" style="padding:16px;display:flex;align-items:center;gap:14px;">
-      <div class="ib ib-emerald"><i class="fa-solid fa-user-tie"></i></div>
-      <div>
-        <div class="label">Supervisors on Duty</div>
-        <div id="cardSupervisors" class="mono" style="font-size:28px;font-weight:700;margin-top:4px;color:#111827;line-height:1;">0</div>
-      </div>
-    </div>
   </section>
 
-  <!-- ── PRODUCT DETAIL PANEL ── -->
-  <section class="card-flat fu fu-2" style="overflow:hidden;">
-    <div class="panel-hdr">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="ib ib-violet"><i class="fa-solid fa-tags"></i></div>
-        <div>
-          <div class="label">Slicer-Filtered Products</div>
-          <div style="font-size:11px;color:#6B7280;margin-top:2px;font-weight:500;">Machine &middot; Product Name &middot; Responsible Supervisor &middot; Cycle Time</div>
-        </div>
-      </div>
-      <span class="badge-prod"><span id="productDetailCount">0</span> Machines</span>
-    </div>
-    <div style="overflow-x:auto;max-height:320px;overflow-y:auto;">
-      <table class="w-full dtable" style="border-collapse:collapse;">
-        <thead>
-          <tr>
-            <th style="text-align:left;min-width:140px;">Machine</th>
-            <th style="text-align:left;min-width:190px;">Product Name</th>
-            <th style="text-align:left;min-width:155px;">Responsible Supervisor</th>
-            <th style="text-align:left;min-width:130px;">Cycle Time</th>
-          </tr>
-        </thead>
-        <tbody id="productDetailBody">
-          <tr><td colspan="4" style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">
-            <i class="fa-solid fa-circle-notch fa-spin" style="font-size:18px;display:block;margin-bottom:8px;color:#A5B4FC;"></i>
-            Loading product data...
-          </td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+
 
   <!-- ── KPI PILLARS ── -->
   <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 fu fu-3">
-    <!-- OEE -->
     <div class="card accent-indigo" style="padding:18px;display:flex;flex-direction:column;justify-content:space-between;min-height:140px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          <div class="label">Overall OEE</div>
-          <div id="kpiOEE" class="kpi-value g-indigo" style="font-size:26px;">0.00%</div>
-        </div>
+        <div><div class="label">Overall OEE</div><div id="kpiOEE" class="kpi-value g-indigo" style="font-size:26px;">0.00%</div></div>
         <div id="badgeOEE" class="ib ib-indigo"><i class="fa-solid fa-gauge-high"></i></div>
       </div>
-      <div>
-        <div class="prog-track"><div id="pOEE" class="prog-fill" style="width:0%;background:linear-gradient(90deg,#4338CA,#6366F1);"></div></div>
-        <div style="font-size:10px;color:#6B7280;margin-top:5px;font-weight:700;">TARGET &nbsp;<span style="color:#065F46;">≥ 85.0%</span></div>
-      </div>
+      <div><div class="prog-track"><div id="pOEE" class="prog-fill" style="width:0%;background:linear-gradient(90deg,#4338CA,#6366F1);"></div></div>
+      <div style="font-size:10px;color:#6B7280;margin-top:5px;font-weight:700;">TARGET &nbsp;<span style="color:#065F46;">≥ 85.0%</span></div></div>
     </div>
-    <!-- Availability -->
     <div class="card accent-blue" style="padding:18px;display:flex;flex-direction:column;justify-content:space-between;min-height:140px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          <div class="label">Availability</div>
-          <div id="kpiAvailability" class="kpi-value g-blue" style="font-size:26px;">0.00%</div>
-        </div>
+        <div><div class="label">Availability</div><div id="kpiAvailability" class="kpi-value g-blue" style="font-size:26px;">0.00%</div></div>
         <div class="ib ib-blue"><i class="fa-solid fa-clock"></i></div>
       </div>
-      <div>
-        <div class="prog-track"><div id="pAvail" class="prog-fill" style="width:0%;background:linear-gradient(90deg,#1D4ED8,#3B82F6);"></div></div>
-        <div style="font-size:10px;color:#6B7280;margin-top:5px;font-weight:700;">Uptime Efficiency</div>
-      </div>
+      <div><div class="prog-track"><div id="pAvail" class="prog-fill" style="width:0%;background:linear-gradient(90deg,#1D4ED8,#3B82F6);"></div></div>
+      <div style="font-size:10px;color:#6B7280;margin-top:5px;font-weight:700;">Uptime Efficiency</div></div>
     </div>
-    <!-- Performance -->
     <div class="card accent-amber" style="padding:18px;display:flex;flex-direction:column;justify-content:space-between;min-height:140px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          <div class="label">Performance</div>
-          <div id="kpiPerformance" class="kpi-value g-amber" style="font-size:26px;">0.00%</div>
-        </div>
+        <div><div class="label">Performance</div><div id="kpiPerformance" class="kpi-value g-amber" style="font-size:26px;">0.00%</div></div>
         <div class="ib ib-amber"><i class="fa-solid fa-bolt"></i></div>
       </div>
-      <div>
-        <div class="prog-track"><div id="pPerf" class="prog-fill" style="width:0%;background:linear-gradient(90deg,#92400E,#D97706);"></div></div>
-        <div style="font-size:10px;color:#6B7280;margin-top:5px;font-weight:700;">Speed & Cycle Precision</div>
-      </div>
+      <div><div class="prog-track"><div id="pPerf" class="prog-fill" style="width:0%;background:linear-gradient(90deg,#92400E,#D97706);"></div></div>
+      <div style="font-size:10px;color:#6B7280;margin-top:5px;font-weight:700;">Speed & Cycle Precision</div></div>
     </div>
-    <!-- Quality -->
     <div class="card accent-teal" style="padding:18px;display:flex;flex-direction:column;justify-content:space-between;min-height:140px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          <div class="label">Quality</div>
-          <div id="kpiQuality" class="kpi-value g-teal" style="font-size:26px;">0.00%</div>
-        </div>
+        <div><div class="label">Quality</div><div id="kpiQuality" class="kpi-value g-teal" style="font-size:26px;">0.00%</div></div>
         <div class="ib ib-teal"><i class="fa-solid fa-circle-check"></i></div>
       </div>
-      <div>
-        <div class="prog-track"><div id="pQual" class="prog-fill" style="width:0%;background:linear-gradient(90deg,#0F766E,#14B8A6);"></div></div>
-        <div style="font-size:10px;color:#6B7280;margin-top:5px;font-weight:700;">Yield / Defect Rate</div>
-      </div>
+      <div><div class="prog-track"><div id="pQual" class="prog-fill" style="width:0%;background:linear-gradient(90deg,#0F766E,#14B8A6);"></div></div>
+      <div style="font-size:10px;color:#6B7280;margin-top:5px;font-weight:700;">Yield / Defect Rate</div></div>
     </div>
   </section>
 
-  <!-- ── OUTPUT SUMMARY (4 cards) ── -->
+  <!-- ── OUTPUT SUMMARY ── -->
   <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 fu fu-4">
     <div class="card" style="padding:16px;display:flex;align-items:center;gap:13px;">
       <div class="ib ib-indigo"><i class="fa-solid fa-boxes-stacked"></i></div>
-      <div>
-        <div class="label">Total Output</div>
-        <div id="kpiTotalOutput" class="mono" style="font-size:18px;font-weight:700;color:#111827;margin-top:3px;">0 <span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">Pcs</span></div>
-      </div>
+      <div><div class="label">Total Output</div>
+      <div id="kpiTotalOutput" class="mono" style="font-size:18px;font-weight:700;color:#111827;margin-top:3px;">0 <span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">Pcs</span></div></div>
     </div>
     <div class="card" style="padding:16px;display:flex;align-items:center;gap:13px;">
       <div class="ib ib-emerald"><i class="fa-solid fa-clipboard-check"></i></div>
-      <div>
-        <div class="label">Good Yield</div>
-        <div id="kpiGoodOutput" class="mono" style="font-size:18px;font-weight:700;color:#111827;margin-top:3px;">0 <span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">Pcs</span></div>
-      </div>
+      <div><div class="label">Good Yield</div>
+      <div id="kpiGoodOutput" class="mono" style="font-size:18px;font-weight:700;color:#111827;margin-top:3px;">0 <span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">Pcs</span></div></div>
     </div>
     <div class="card" style="padding:16px;display:flex;align-items:center;gap:13px;">
       <div class="ib ib-rose"><i class="fa-solid fa-triangle-exclamation"></i></div>
-      <div>
-        <div class="label">Unplanned Losses</div>
-        <div id="kpiTotalDowntime" class="mono" style="font-size:18px;font-weight:700;color:#111827;margin-top:3px;">0 <span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">Mins</span></div>
-      </div>
+      <div><div class="label">Unplanned Losses</div>
+      <div id="kpiTotalDowntime" class="mono" style="font-size:18px;font-weight:700;color:#111827;margin-top:3px;">0 <span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">Mins</span></div></div>
     </div>
     <div class="card accent-orange" style="padding:16px;display:flex;align-items:center;gap:13px;">
       <div class="ib ib-orange"><i class="fa-solid fa-calendar-xmark"></i></div>
-      <div style="min-width:0;">
-        <div class="label">Planned Downtime</div>
-        <div id="kpiPlannedDT" class="mono" style="font-size:18px;font-weight:700;color:#111827;margin-top:3px;">0 <span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">Mins</span></div>
-        <div id="kpiPlannedDTSource" style="font-size:9px;color:#9CA3AF;margin-top:2px;font-weight:600;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-      </div>
+      <div style="min-width:0;"><div class="label">Planned Downtime</div>
+      <div id="kpiPlannedDT" class="mono" style="font-size:18px;font-weight:700;color:#111827;margin-top:3px;">0 <span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">Mins</span></div>
+      <div id="kpiPlannedDTSource" style="font-size:9px;color:#9CA3AF;margin-top:2px;font-weight:600;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div></div>
     </div>
   </section>
 
   <!-- ── CHARTS ── -->
   <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <!-- Trend -->
     <div class="card-flat" style="padding:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <i class="fa-solid fa-chart-line" style="color:#6366F1;font-size:13px;"></i>
           <span class="label">OEE Daily Trend</span>
         </div>
-        <span style="font-size:10px;background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;border-radius:20px;padding:2px 10px;font-weight:700;">Day-Slicer Disconnected</span>
       </div>
       <div id="trendChart" style="height:270px;"></div>
     </div>
-
-    <!-- Donut -->
     <div class="card-flat" style="padding:20px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
         <i class="fa-solid fa-chart-pie" style="color:#8B5CF6;font-size:13px;"></i>
@@ -586,8 +419,6 @@ header {
         </div>
       </div>
     </div>
-
-    <!-- Product Bar full-width -->
     <div class="card-flat lg:col-span-2" style="padding:20px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
         <i class="fa-solid fa-chart-bar" style="color:#10B981;font-size:13px;"></i>
@@ -597,7 +428,7 @@ header {
     </div>
   </section>
 
-  <!-- ── PRODUCTION RECORDS TABLE ── -->
+  <!-- ── RECORDS TABLE ── -->
   <section class="card-flat" style="overflow:hidden;">
     <div class="panel-hdr">
       <div style="display:flex;align-items:center;gap:8px;">
@@ -605,9 +436,7 @@ header {
         <span class="label">Filtered Production Records</span>
       </div>
       <div style="position:relative;">
-        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:11px;pointer-events:none;">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </span>
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:11px;pointer-events:none;"><i class="fa-solid fa-magnifying-glass"></i></span>
         <input type="text" id="tableSearch" onkeyup="searchTable()" placeholder="Search records..." class="f-search" style="width:210px;">
       </div>
     </div>
@@ -615,21 +444,16 @@ header {
       <table class="w-full dtable" style="border-collapse:collapse;">
         <thead>
           <tr>
-            <th style="text-align:left;">Date</th>
-            <th style="text-align:left;">Machine</th>
-            <th style="text-align:left;">Shift</th>
-            <th style="text-align:left;">Product Criteria</th>
-            <th style="text-align:left;">Supervisor</th>
-            <th style="text-align:right;">Target (Pcs)</th>
-            <th style="text-align:right;">Actual (Pcs)</th>
-            <th style="text-align:right;">Wastage (Pcs)</th>
+            <th style="text-align:left;">Date</th><th style="text-align:left;">Machine</th>
+            <th style="text-align:left;">Shift</th><th style="text-align:left;">Product Criteria</th>
+            <th style="text-align:left;">Supervisor</th><th style="text-align:right;">Target (Pcs)</th>
+            <th style="text-align:right;">Actual (Pcs)</th><th style="text-align:right;">Wastage (Pcs)</th>
             <th style="text-align:center;">OEE %</th>
           </tr>
         </thead>
         <tbody id="productionTableBody">
           <tr><td colspan="9" style="text-align:center;padding:40px;color:#9CA3AF;font-size:13px;">
-            <i class="fa-solid fa-circle-notch fa-spin" style="font-size:18px;display:block;margin-bottom:8px;color:#A5B4FC;"></i>
-            Loading records...
+            <i class="fa-solid fa-circle-notch fa-spin" style="font-size:18px;display:block;margin-bottom:8px;color:#A5B4FC;"></i>Loading records...
           </td></tr>
         </tbody>
       </table>
@@ -637,486 +461,509 @@ header {
   </section>
 </main>
 
-<!-- FOOTER -->
-<footer style="border-top:1px solid #E5E7EB;background:#ffffff;margin-top:40px;padding:20px;">
+<footer style="border-top:1px solid #E5E7EB;background:#fff;margin-top:40px;padding:20px;">
   <div class="max-w-7xl mx-auto" style="text-align:center;font-size:11px;color:#9CA3AF;font-weight:500;line-height:2;">
     <p style="color:#6B7280;font-weight:600;">&copy; 2026 Akij Light Engineering Ltd. All rights reserved.</p>
-    <p>OEE Analytics Engine &middot; Tailwind CSS + ApexCharts</p>
   </div>
 </footer>
 
-<!-- ═══════════════════════════════ SCRIPT ═══════════════════════════════ -->
 <script>
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT278Z7eDyGDEydyjtAkK0xGD0Y9y5GmAw8DJcFsLyX1agdEE-UD7hQdEZZvsmkU68CuK0BOfvZi1vk/pub?gid=78827421&single=true&output=csv";
+const csvUrl="https://docs.google.com/spreadsheets/d/e/2PACX-1vT278Z7eDyGDEydyjtAkK0xGD0Y9y5GmAw8DJcFsLyX1agdEE-UD7hQdEZZvsmkU68CuK0BOfvZi1vk/pub?gid=78827421&single=true&output=csv";
+let dashboardData=[],cycleTimeCol=null,plannedDTCol=null;
+let trendInst=null,downtimeInst=null,productInst=null;
+const MONTH_FULL=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MONTH_SHORT=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const LOSS=['Utility (Gas)','Utility (Electricity)','Unavailable Order','Raw Material Shortage','Manpower Shortage','QCO (Quick change over)','In Process Setup/Adjustment','Mechanical Breakdown','Electrical Breakdown','Others down time'];
+const DONUT_COLORS=['#EF4444','#F97316','#F59E0B','#EAB308','#84CC16','#10B981','#06B6D4','#3B82F6','#6366F1','#A855F7'];
+const cleanNum=v=>{if(!v)return 0;const p=parseFloat(v.toString().replace(/[\s,%]/g,''));return isNaN(p)?0:p;};
 
-let dashboardData = [], cycleTimeCol = null, plannedDTCol = null;
-let trendInst = null, downtimeInst = null, productInst = null;
-
-const MONTH = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const LOSS  = ['Utility (Gas)','Utility (Electricity)','Unavailable Order','Raw Material Shortage',
-               'Manpower Shortage','QCO (Quick change over)','In Process Setup/Adjustment',
-               'Mechanical Breakdown','Electrical Breakdown','Others down time'];
-const DONUT_COLORS = ['#EF4444','#F97316','#F59E0B','#EAB308','#84CC16','#10B981','#06B6D4','#3B82F6','#6366F1','#A855F7'];
-
-const cleanNum = v => { if(!v) return 0; const p = parseFloat(v.toString().replace(/[\s,%]/g,'')); return isNaN(p) ? 0 : p; };
-
-/* ── Auto-detect cycle time column ── */
-function detectCTCol(headers) {
-  const c = ['Std. Cycle Time (Sec)','Std Cycle Time (Sec)','Std. Cycle Time','Cycle Time (Sec)',
-             'Cycle Time (sec)','CycleTime (Sec)','Standard Cycle Time (Sec)','Standard Cycle Time',
-             'Actual Cycle Time (Sec)','Actual Cycle Time','Cycle Time','CT (Sec)','CT(Sec)','CycleTime'];
-  for(let k of c){ if(headers.includes(k)) return k; }
-  for(let k of c){ const m = headers.find(h => h.toLowerCase()===k.toLowerCase()); if(m) return m; }
-  return headers.find(h => h.toLowerCase().includes('cycle')) || null;
+/* ── Column detectors ── */
+function detectCTCol(h){
+  const c=['Std. Cycle Time (Sec)','Std Cycle Time (Sec)','Std. Cycle Time','Cycle Time (Sec)','Cycle Time (sec)','CycleTime (Sec)','Standard Cycle Time (Sec)','Standard Cycle Time','Actual Cycle Time (Sec)','Actual Cycle Time','Cycle Time','CT (Sec)','CT(Sec)','CycleTime'];
+  for(let k of c)if(h.includes(k))return k;
+  for(let k of c){const m=h.find(x=>x.toLowerCase()===k.toLowerCase());if(m)return m;}
+  return h.find(x=>x.toLowerCase().includes('cycle'))||null;
+}
+function detectPlannedDTCol(h){
+  const c=['Total Planned Downtime (Min.)','Planned Downtime (Min.)','Planned Downtime','Planned NPT (Min.)','Planned NPT','Planned Maintenance (Min.)','Planned Maintenance','Scheduled Downtime (Min.)','Scheduled Downtime','Planned Time Loss (Min.)','Planned Time Loss','PDT (Min.)','PDT','Planned Break (Min.)','Planned Stop (Min.)'];
+  for(let k of c)if(h.includes(k))return k;
+  for(let k of c){const m=h.find(x=>x.toLowerCase()===k.toLowerCase());if(m)return m;}
+  return h.find(x=>{const l=x.toLowerCase();return l.includes('planned')&&(l.includes('down')||l.includes('npt')||l.includes('maintenance')||l.includes('time'));})||null;
 }
 
-/* ── Auto-detect planned downtime column ── */
-function detectPlannedDTCol(headers) {
-  const c = ['Total Planned Downtime (Min.)','Planned Downtime (Min.)','Planned Downtime',
-             'Planned NPT (Min.)','Planned NPT','Planned Maintenance (Min.)','Planned Maintenance',
-             'Scheduled Downtime (Min.)','Scheduled Downtime','Planned Time Loss (Min.)',
-             'Planned Time Loss','PDT (Min.)','PDT','Planned Break (Min.)','Planned Stop (Min.)'];
-  for(let k of c){ if(headers.includes(k)) return k; }
-  for(let k of c){ const m = headers.find(h => h.toLowerCase()===k.toLowerCase()); if(m) return m; }
-  return headers.find(h => {
-    const l = h.toLowerCase();
-    return l.includes('planned') && (l.includes('down')||l.includes('npt')||l.includes('maintenance')||l.includes('time'));
-  }) || null;
+/* ══════════════════════════
+   CALENDAR STATE & LOGIC
+══════════════════════════ */
+let calOpen=false, calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+let selStart=null, selEnd=null, selPickingEnd=false, hoverDate=null;
+let dataDatesSet=new Set(); // string keys "YYYY-MM-DD"
+
+function positionCal(){
+  const trigger=document.getElementById('calTrigger');
+  const dropdown=document.getElementById('calDropdown');
+  const rect=trigger.getBoundingClientRect();
+  const dropW=310;
+  // Align left edge with trigger; if it overflows viewport right, shift left
+  let left=rect.left;
+  if(left+dropW>window.innerWidth-8)left=window.innerWidth-dropW-8;
+  dropdown.style.top=(rect.bottom+8)+'px';
+  dropdown.style.left=left+'px';
+}
+function toggleCal(e){
+  e.stopPropagation();
+  calOpen=!calOpen;
+  const dropdown=document.getElementById('calDropdown');
+  const trigger=document.getElementById('calTrigger');
+  if(calOpen){positionCal();dropdown.classList.add('open');trigger.classList.add('open');renderCalGrid();}
+  else{dropdown.classList.remove('open');trigger.classList.remove('open');}
+}
+function closeCal(){
+  calOpen=false;
+  document.getElementById('calDropdown').classList.remove('open');
+  document.getElementById('calTrigger').classList.remove('open');
+}
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('calWrap');
+  if(wrap&&!wrap.contains(e.target)&&!document.getElementById('calDropdown').contains(e.target))closeCal();
+});
+window.addEventListener('scroll',()=>{if(calOpen)positionCal();},{passive:true});
+window.addEventListener('resize',()=>{if(calOpen)positionCal();},{passive:true});
+
+function calNav(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCalGrid();
 }
 
-/* ══════════════ LOADING SCREEN ══════════════ */
-const lsFill   = document.getElementById('lsProgressFill');
-const lsStatus = document.getElementById('lsStatus');
+function renderCalGrid(){
+  document.getElementById('calMonthLbl').textContent=`${MONTH_FULL[calMonth]} ${calYear}`;
+  const today=new Date();today.setHours(0,0,0,0);
+  const firstDOW=new Date(calYear,calMonth,1).getDay(); // 0=Sun
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const offset=(firstDOW===0)?6:firstDOW-1; // Mon-based
 
-function lsSet(pct, html) {
-  lsFill.style.width = pct + '%';
-  if(html) lsStatus.innerHTML = html;
-}
-function lsHide() {
-  lsSet(100, '<span style="color:#065F46;font-weight:600;"><i class="fa-solid fa-circle-check"></i> &nbsp;Dashboard ready</span>');
-  setTimeout(() => document.getElementById('loadingScreen').classList.add('hidden'), 500);
-}
-function lsStart() {
-  lsSet(5, 'Connecting to production pipeline<span class="ls-dots"><span>.</span><span>.</span><span>.</span></span>');
-  [
-    {p:22, d:400,  t:'Fetching shift records'},
-    {p:48, d:900,  t:'Parsing production data'},
-    {p:68, d:1600, t:'Computing OEE metrics'},
-    {p:82, d:2300, t:'Rendering dashboard'}
-  ].forEach(s => setTimeout(() => {
-    if(parseFloat(lsFill.style.width) < s.p)
-      lsSet(s.p, s.t + '<span class="ls-dots"><span>.</span><span>.</span><span>.</span></span>');
-  }, s.d));
-}
+  // Remove old day cells (keep DOW headers = first 7 children)
+  const grid=document.getElementById('calGrid');
+  while(grid.children.length>7)grid.removeChild(grid.lastChild);
 
-/* ══════════════ HEADER STATUS ══════════════ */
-function setStatus(type, html) {
-  const el = document.getElementById('loadingStatus');
-  const S = {
-    loading:'background:#EEF2FF;border-color:#C7D2FE;color:#4338CA;',
-    success:'background:#F0FDF4;border-color:#86EFAC;color:#166534;',
-    error:  'background:#FFF1F2;border-color:#FDA4AF;color:#9F1239;'
-  };
-  el.style.cssText = `display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:20px;border:1px solid;font-size:11px;font-weight:700;${S[type]}`;
-  el.innerHTML = html;
-}
+  // Empty prefix cells
+  for(let i=0;i<offset;i++){
+    const e=document.createElement('div');e.className='cal-day empty';grid.appendChild(e);
+  }
 
-/* ══════════════ BOOT ══════════════ */
-window.addEventListener('DOMContentLoaded', () => { lsStart(); fetchData(); });
+  // Day cells
+  for(let d=1;d<=daysInMonth;d++){
+    const dateKey=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dateObj=new Date(calYear,calMonth,d);dateObj.setHours(0,0,0,0);
+    const cell=document.createElement('div');
+    let cls='cal-day';
+    const hasData=dataDatesSet.has(dateKey);
+    if(!hasData)cls+=' no-data';
+    else cls+=' has-data';
+    if(dateObj.getTime()===today.getTime())cls+=' today';
 
-function fetchData() {
-  const to = setTimeout(() => {
-    if(!dashboardData.length) {
-      lsSet(100, '<span style="color:#9F1239;"><i class="fa-solid fa-triangle-exclamation"></i> Connection timeout</span>');
-      setStatus('error','<i class="fa-solid fa-triangle-exclamation"></i> Timeout');
-      setTimeout(lsHide, 1800);
+    // Range highlight
+    const ts=dateObj.getTime();
+    const startTs=selStart?selStart.getTime():null;
+    const endTs=selEnd?selEnd.getTime():null;
+    const hoverTs=hoverDate?hoverDate.getTime():null;
+
+    // While picking end, show preview range
+    const previewEnd=selPickingEnd&&hoverTs?hoverTs:endTs;
+    const rangeMin=startTs&&previewEnd?Math.min(startTs,previewEnd):startTs;
+    const rangeMax=startTs&&previewEnd?Math.max(startTs,previewEnd):previewEnd;
+
+    if(startTs&&ts===startTs)cls+=ts===rangeMax?' sel-start sel-end':' sel-start';
+    else if(rangeMax&&ts===rangeMax)cls+=' sel-end';
+    else if(rangeMin&&rangeMax&&ts>rangeMin&&ts<rangeMax)cls+=' in-range';
+
+    cell.className=cls;
+    cell.textContent=d;
+    cell.dataset.date=dateKey;
+    cell.dataset.ts=dateObj.getTime();
+    if(hasData){
+      cell.onclick=()=>calSelect(dateObj);
+      cell.onmouseover=()=>{if(selPickingEnd){hoverDate=dateObj;renderCalGrid();}};
+      cell.onmouseout=()=>{if(selPickingEnd){hoverDate=null;renderCalGrid();}};
     }
-  }, 9000);
-
-  Papa.parse(csvUrl, {
-    download: true, header: true, skipEmptyLines: true,
-    transformHeader: h => h.trim(),
-    complete(res) {
-      clearTimeout(to);
-      if(res.data && res.data.length) {
-        const headers = Object.keys(res.data[0]);
-        cycleTimeCol  = detectCTCol(headers);
-        plannedDTCol  = detectPlannedDTCol(headers);
-
-        dashboardData = res.data.filter(r => r['Date']).map(row => {
-          const pts = row['Date'].split('-');
-          if(pts.length === 3) {
-            row._year  = pts[0].trim();
-            row._month = MONTH[parseInt(pts[1].trim(),10)-1] || 'Unknown';
-            row._day   = pts[2].trim().padStart(2,'0');
-          } else {
-            const dt = new Date(row['Date']);
-            if(!isNaN(dt)) {
-              row._year  = dt.getFullYear().toString();
-              row._month = MONTH[dt.getMonth()];
-              row._day   = dt.getDate().toString().padStart(2,'0');
-            }
-          }
-          return row;
-        });
-
-        setStatus('success', `
-          <span style="position:relative;width:8px;height:8px;border-radius:50%;background:#16A34A;display:inline-block;flex-shrink:0;"></span>
-          Live Feed Active`);
-        buildFilters(); initCharts(); renderDashboard(); lsHide();
-      }
-    },
-    error() {
-      clearTimeout(to);
-      setStatus('error','<i class="fa-solid fa-circle-xmark"></i> Feed Blocked');
-      lsSet(100,'<span style="color:#9F1239;">Network error — cannot reach data source</span>');
-      setTimeout(lsHide, 1800);
-    }
-  });
+    grid.appendChild(cell);
+  }
+  updateCalSelectedInfo();
+  updateQuickBtnStates();
 }
 
-/* ══════════════ REFRESH DATA ══════════════ */
-function refreshData() {
-  const btn = document.getElementById('btnRefresh');
-  btn.classList.add('spinning');
-  btn.disabled = true;
-
-  // Clear existing filter options back to default
-  ['filterYear','filterMonth','filterDay','filterShift'].forEach(id => {
-    const sel = document.getElementById(id);
-    // Keep only first "All ..." option
-    while(sel.options.length > 1) sel.remove(1);
-    sel.value = 'All';
-  });
-
-  // Reset data
-  dashboardData = []; cycleTimeCol = null; plannedDTCol = null;
-
-  setStatus('loading', '<i class="fa-solid fa-spinner fa-spin" style="font-size:10px;"></i> Refreshing...');
-
-  Papa.parse(csvUrl, {
-    download: true, header: true, skipEmptyLines: true,
-    transformHeader: h => h.trim(),
-    complete(res) {
-      btn.classList.remove('spinning'); btn.disabled = false;
-      if(res.data && res.data.length) {
-        const headers = Object.keys(res.data[0]);
-        cycleTimeCol  = detectCTCol(headers);
-        plannedDTCol  = detectPlannedDTCol(headers);
-        dashboardData = res.data.filter(r => r['Date']).map(row => {
-          const pts = row['Date'].split('-');
-          if(pts.length === 3) {
-            row._year  = pts[0].trim();
-            row._month = MONTH[parseInt(pts[1].trim(),10)-1] || 'Unknown';
-            row._day   = pts[2].trim().padStart(2,'0');
-          } else {
-            const dt = new Date(row['Date']);
-            if(!isNaN(dt)) {
-              row._year  = dt.getFullYear().toString();
-              row._month = MONTH[dt.getMonth()];
-              row._day   = dt.getDate().toString().padStart(2,'0');
-            }
-          }
-          return row;
-        });
-        setStatus('success', `<span style="position:relative;width:8px;height:8px;border-radius:50%;background:#16A34A;display:inline-block;flex-shrink:0;"></span> Live Feed Active`);
-        buildFilters(); renderDashboard();
-      }
-    },
-    error() {
-      btn.classList.remove('spinning'); btn.disabled = false;
-      setStatus('error','<i class="fa-solid fa-circle-xmark"></i> Refresh Failed');
-    }
-  });
+function calSelect(dateObj){
+  if(!selStart||!selPickingEnd){
+    // First click: set start
+    selStart=new Date(dateObj.getTime());
+    selEnd=null;
+    selPickingEnd=true;
+  } else {
+    // Second click: set end
+    selEnd=new Date(dateObj.getTime());
+    selPickingEnd=false;
+    hoverDate=null;
+    // Ensure start <= end
+    if(selStart>selEnd){const tmp=selStart;selStart=selEnd;selEnd=tmp;}
+    closeCal();
+    renderDashboard();
+  }
+  renderCalGrid();
+  updateCalLabel();
 }
 
-/* ══════════════ FILTERS ══════════════ */
-function buildFilters() {
-  const yrs={}, mos={}, dys={}, shs={};
-  dashboardData.forEach(r => {
-    if(r._year)  yrs[r._year]  = 1;
-    if(r._month) mos[r._month] = 1;
-    if(r._day)   dys[r._day]   = 1;
-    if(r['Shift']) shs[r['Shift'].trim()] = 1;
-  });
-  const add = (id, keys) => keys.forEach(k => {
-    const o = document.createElement('option'); o.value = o.textContent = k;
-    document.getElementById(id).appendChild(o);
-  });
-  add('filterYear',  Object.keys(yrs).sort());
-  add('filterMonth', MONTH.filter(m => mos[m]));
-  add('filterDay',   Object.keys(dys).sort((a,b) => +a-+b));
-  add('filterShift', Object.keys(shs).sort());
-  ['filterYear','filterMonth','filterDay','filterShift'].forEach(id =>
-    document.getElementById(id).addEventListener('change', renderDashboard));
-}
-
-function resetFilters() {
-  ['filterYear','filterMonth','filterDay','filterShift'].forEach(id => document.getElementById(id).value = 'All');
-  document.getElementById('tableSearch').value = '';
+function calQuick(type){
+  const now=new Date();now.setHours(0,0,0,0);
+  selPickingEnd=false;hoverDate=null;
+  if(type==='today'){selStart=new Date(now);selEnd=new Date(now);}
+  else if(type==='week'){
+    const dow=now.getDay()===0?6:now.getDay()-1;
+    selStart=new Date(now);selStart.setDate(now.getDate()-dow);
+    selEnd=new Date(now);
+  }
+  else if(type==='month'){
+    selStart=new Date(now.getFullYear(),now.getMonth(),1);
+    selEnd=new Date(now.getFullYear(),now.getMonth()+1,0);
+  }
+  else{selStart=null;selEnd=null;}
+  // Navigate calendar to show selStart's month
+  if(selStart){calYear=selStart.getFullYear();calMonth=selStart.getMonth();}
+  renderCalGrid();
+  updateCalLabel();
+  closeCal();
   renderDashboard();
 }
 
-function renderDashboard() {
-  const fY = document.getElementById('filterYear').value;
-  const fM = document.getElementById('filterMonth').value;
-  const fD = document.getElementById('filterDay').value;
-  const fS = document.getElementById('filterShift').value;
-
-  const fil = dashboardData.filter(r => {
-    if(fY !== 'All' && r._year  !== fY) return false;
-    if(fM !== 'All' && r._month !== fM) return false;
-    if(fD !== 'All' && r._day   !== fD) return false;
-    if(fS !== 'All' && r['Shift']?.trim() !== fS) return false;
-    return true;
-  });
-  const trend = dashboardData.filter(r => {
-    if(fY !== 'All' && r._year  !== fY) return false;
-    if(fM !== 'All' && r._month !== fM) return false;
-    if(fS !== 'All' && r['Shift']?.trim() !== fS) return false;
-    return true;
-  });
-
-  updateCards(fil); calcKPIs(fil); updateTrend(trend);
-  updateDowntime(fil); updateProductChart(fil); populateTable(fil);
+function updateCalLabel(){
+  const lbl=document.getElementById('calLabel');
+  if(!selStart&&!selEnd){lbl.textContent='All Dates';return;}
+  const fmt=d=>`${d.getDate()} ${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+  if(selStart&&selEnd){
+    if(selStart.getTime()===selEnd.getTime())lbl.textContent=fmt(selStart);
+    else lbl.textContent=`${fmt(selStart)} — ${fmt(selEnd)}`;
+  } else if(selStart){
+    lbl.textContent=`From ${fmt(selStart)}`;
+  }
 }
 
-/* ══════════════ CARDS + PRODUCT TABLE (grouped by Machine) ══════════════ */
-function updateCards(records) {
-  const macs = new Set(), sups = new Set();
-  // macMap: machine → { products: Set, supervisors: Set, cycleTimes: Set }
-  const macMap = new Map();
+function updateCalSelectedInfo(){
+  const info=document.getElementById('calSelInfo');
+  const txt=document.getElementById('calSelText');
+  if(selStart&&selEnd){
+    const fmt=d=>`${d.getDate()} ${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+    const diff=Math.round((selEnd-selStart)/(1000*60*60*24))+1;
+    txt.textContent=`${fmt(selStart)} → ${fmt(selEnd)}  (${diff} day${diff>1?'s':''})`;
+    info.classList.add('visible');
+  } else if(selStart&&selPickingEnd){
+    txt.textContent='Click an end date to complete the range';
+    info.classList.add('visible');
+  } else {
+    info.classList.remove('visible');
+  }
+}
 
-  records.forEach(row => {
-    const mac = row['Machine']?.trim();
-    const sup = row['Supervisor Name']?.trim();
-    const pro = row['Product Criteria']?.trim();
-    if(mac && mac !== 'NaN') macs.add(mac);
-    if(sup) sups.add(sup);
+function updateQuickBtnStates(){
+  ['qToday','qWeek','qMonth','qAll'].forEach(id=>document.getElementById(id)?.classList.remove('active'));
+  if(!selStart&&!selEnd){document.getElementById('qAll')?.classList.add('active');return;}
+  const now=new Date();now.setHours(0,0,0,0);
+  if(selStart&&selEnd){
+    if(selStart.getTime()===now.getTime()&&selEnd.getTime()===now.getTime()){document.getElementById('qToday')?.classList.add('active');return;}
+    const dow=now.getDay()===0?6:now.getDay()-1;
+    const wkStart=new Date(now);wkStart.setDate(now.getDate()-dow);
+    if(selStart.getTime()===wkStart.getTime()&&selEnd.getTime()===now.getTime()){document.getElementById('qWeek')?.classList.add('active');return;}
+    const mStart=new Date(now.getFullYear(),now.getMonth(),1);
+    const mEnd=new Date(now.getFullYear(),now.getMonth()+1,0);
+    if(selStart.getTime()===mStart.getTime()&&selEnd.getTime()===mEnd.getTime()){document.getElementById('qMonth')?.classList.add('active');return;}
+  }
+}
 
-    if(mac && mac !== 'NaN') {
-      if(!macMap.has(mac)) macMap.set(mac, { products: new Set(), supervisors: new Set(), cycleTimes: new Set() });
-      const md = macMap.get(mac);
-      if(pro) md.products.add(pro);
-      if(sup) md.supervisors.add(sup);
+/* ══════════════════════════
+   LOADING SCREEN
+══════════════════════════ */
+const lsFill=document.getElementById('lsProgressFill'),lsStatusEl=document.getElementById('lsStatus');
+function lsSet(pct,html){lsFill.style.width=pct+'%';if(html)lsStatusEl.innerHTML=html;}
+function lsHide(){lsSet(100,'<span style="color:#065F46;font-weight:600;"><i class="fa-solid fa-circle-check"></i> &nbsp;Dashboard ready</span>');setTimeout(()=>document.getElementById('loadingScreen').classList.add('hidden'),500);}
+function lsStart(){
+  lsSet(5,'Connecting to production pipeline<span class="ls-dots"><span>.</span><span>.</span><span>.</span></span>');
+  [{p:22,d:400,t:'Fetching shift records'},{p:48,d:900,t:'Parsing production data'},{p:68,d:1600,t:'Computing OEE metrics'},{p:82,d:2300,t:'Rendering dashboard'}]
+  .forEach(s=>setTimeout(()=>{if(parseFloat(lsFill.style.width)<s.p)lsSet(s.p,s.t+'<span class="ls-dots"><span>.</span><span>.</span><span>.</span></span>');},s.d));
+}
 
-      // Collect cycle times for this machine
-      let ctRaw = cycleTimeCol ? row[cycleTimeCol] : null;
-      if(!ctRaw || ctRaw.toString().trim() === '' || ctRaw.toString().trim() === '0') {
-        for(let k of Object.keys(row)) {
-          if(k.toLowerCase().includes('cycle') && k.toLowerCase().includes('time')) { ctRaw = row[k]; break; }
-        }
+/* ══════════════════════════
+   HEADER STATUS
+══════════════════════════ */
+function setStatus(type,html){
+  const el=document.getElementById('loadingStatus');
+  const S={loading:'background:#EEF2FF;border-color:#C7D2FE;color:#4338CA;',success:'background:#F0FDF4;border-color:#86EFAC;color:#166534;',error:'background:#FFF1F2;border-color:#FDA4AF;color:#9F1239;'};
+  el.style.cssText=`display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:20px;border:1px solid;font-size:11px;font-weight:700;${S[type]}`;
+  el.innerHTML=html;
+}
+
+/* ══════════════════════════
+   BOOT
+══════════════════════════ */
+window.addEventListener('DOMContentLoaded',()=>{
+  // Detach calendar dropdown from its animated parent and re-attach to <body>
+  // so position:fixed truly escapes every stacking context (animation, transform, etc.)
+  document.body.appendChild(document.getElementById('calDropdown'));
+  lsStart();
+  fetchData();
+});
+
+function fetchData(){
+  const to=setTimeout(()=>{
+    if(!dashboardData.length){lsSet(100,'<span style="color:#9F1239;"><i class="fa-solid fa-triangle-exclamation"></i> Connection timeout</span>');setStatus('error','<i class="fa-solid fa-triangle-exclamation"></i> Timeout');setTimeout(lsHide,1800);}
+  },9000);
+  Papa.parse(csvUrl,{
+    download:true,header:true,skipEmptyLines:true,transformHeader:h=>h.trim(),
+    complete(res){
+      clearTimeout(to);
+      if(res.data&&res.data.length){
+        const headers=Object.keys(res.data[0]);
+        cycleTimeCol=detectCTCol(headers);plannedDTCol=detectPlannedDTCol(headers);
+        dataDatesSet=new Set();
+        dashboardData=res.data.filter(r=>r['Date']).map(row=>{
+          const pts=row['Date'].split('-');
+          if(pts.length===3){
+            const y=parseInt(pts[0].trim()),mo=parseInt(pts[1].trim())-1,d=parseInt(pts[2].trim());
+            row._year=pts[0].trim();row._month=MONTH_SHORT[mo]||'Unknown';row._day=pts[2].trim().padStart(2,'0');
+            row._dateObj=new Date(y,mo,d);row._dateObj.setHours(0,0,0,0);
+            dataDatesSet.add(`${pts[0].trim()}-${pts[1].trim().padStart(2,'0')}-${pts[2].trim().padStart(2,'0')}`);
+          } else {
+            const dt=new Date(row['Date']);
+            if(!isNaN(dt)){
+              row._year=dt.getFullYear().toString();row._month=MONTH_SHORT[dt.getMonth()];row._day=dt.getDate().toString().padStart(2,'0');
+              row._dateObj=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());row._dateObj.setHours(0,0,0,0);
+              dataDatesSet.add(`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`);
+            }
+          }
+          return row;
+        });
+        // Navigate calendar to most recent data month
+        const allTs=dashboardData.filter(r=>r._dateObj).map(r=>r._dateObj.getTime());
+        if(allTs.length){const latest=new Date(Math.max(...allTs));calYear=latest.getFullYear();calMonth=latest.getMonth();}
+        setStatus('success','<span style="position:relative;width:8px;height:8px;border-radius:50%;background:#16A34A;display:inline-block;flex-shrink:0;"></span> Live Feed Active');
+        buildFilters();initCharts();renderDashboard();lsHide();
       }
-      const ctVal = cleanNum(ctRaw);
-      if(ctVal > 0) md.cycleTimes.add(ctVal);
+    },
+    error(){clearTimeout(to);setStatus('error','<i class="fa-solid fa-circle-xmark"></i> Feed Blocked');lsSet(100,'<span style="color:#9F1239;">Network error</span>');setTimeout(lsHide,1800);}
+  });
+}
+
+/* ══════════════════════════
+   FILTERS
+══════════════════════════ */
+function buildFilters(){
+  const shs={};
+  dashboardData.forEach(r=>{if(r['Shift'])shs[r['Shift'].trim()]=1;});
+  const sel=document.getElementById('filterShift');
+  Object.keys(shs).sort().forEach(s=>{const o=document.createElement('option');o.value=o.textContent=s;sel.appendChild(o);});
+  sel.addEventListener('change',renderDashboard);
+}
+
+function resetFilters(){
+  selStart=null;selEnd=null;selPickingEnd=false;hoverDate=null;
+  updateCalLabel();
+  document.getElementById('filterShift').value='All';
+  document.getElementById('tableSearch').value='';
+  if(calOpen)closeCal();
+  renderDashboard();
+}
+
+function renderDashboard(){
+  const fS=document.getElementById('filterShift').value;
+  const fil=dashboardData.filter(r=>{
+    if(fS!=='All'&&r['Shift']?.trim()!==fS)return false;
+    if(r._dateObj){
+      if(selStart&&r._dateObj<selStart)return false;
+      if(selEnd&&r._dateObj>selEnd)return false;
+    }
+    return true;
+  });
+  updateCards(fil);calcKPIs(fil);updateTrend(fil);
+  updateDowntime(fil);updateProductChart(fil);populateTable(fil);
+  updateCalLabel();
+}
+
+/* ══════════════════════════
+   CARDS + PRODUCT TABLE
+══════════════════════════ */
+function updateCards(records){
+  const sups=new Set();
+  const macMap=new Map(); // mac → {products:Set, supervisors:Set, ctByProduct:Map}
+  records.forEach(row=>{
+    const mac=row['Machine']?.trim(),sup=row['Supervisor Name']?.trim(),pro=row['Product Criteria']?.trim();
+    if(sup)sups.add(sup);
+    if(mac&&mac!=='NaN'){
+      if(!macMap.has(mac))macMap.set(mac,{products:new Set(),supervisors:new Set(),ctByProduct:new Map()});
+      const md=macMap.get(mac);
+      if(pro){
+        md.products.add(pro);
+        let ctRaw=cycleTimeCol?row[cycleTimeCol]:null;
+        if(!ctRaw||ctRaw.toString().trim()===''||ctRaw.toString().trim()==='0'){
+          for(let k of Object.keys(row)){if(k.toLowerCase().includes('cycle')&&k.toLowerCase().includes('time')){ctRaw=row[k];break;}}
+        }
+        const ctVal=cleanNum(ctRaw);
+        if(ctVal>0){if(!md.ctByProduct.has(pro))md.ctByProduct.set(pro,new Set());md.ctByProduct.get(pro).add(ctVal);}
+      }
+      if(sup)md.supervisors.add(sup);
     }
   });
-
-  document.getElementById('cardMachines').textContent    = macs.size;
-  document.getElementById('cardSupervisors').textContent = sups.size;
-
-  const tbody = document.getElementById('productDetailBody');
-  const cntEl = document.getElementById('productDetailCount');
-  tbody.innerHTML = '';
-
-  if(!macMap.size) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">
-      <i class="fa-solid fa-folder-open" style="font-size:18px;display:block;margin-bottom:6px;color:#D1D5DB;"></i>
-      No machines match the selected filters.</td></tr>`;
-    cntEl.textContent = '0'; return;
+  document.getElementById('cardMachines').textContent=macMap.size;
+  document.getElementById('cardSupervisors').textContent=sups.size;
+  const tbody=document.getElementById('productDetailBody'),cntEl=document.getElementById('productDetailCount');
+  tbody.innerHTML='';
+  if(!macMap.size){
+    tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;"><i class="fa-solid fa-folder-open" style="font-size:18px;display:block;margin-bottom:6px;color:#D1D5DB;"></i>No data matches the selected filters.</td></tr>`;
+    cntEl.textContent='0';return;
   }
-  cntEl.textContent = macMap.size;
-
-  Array.from(macMap.keys()).sort().forEach(mac => {
-    const md = macMap.get(mac);
-
-    const proHtml = Array.from(md.products).sort().map(p =>
-      `<span style="display:inline-block;background:#F0FDF4;border:1px solid #86EFAC;color:#166534;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:600;margin:1px;">${p}</span>`
-    ).join('') || '<span style="color:#9CA3AF;">—</span>';
-
-    const supHtml = Array.from(md.supervisors).sort().join(', ') || '<span style="color:#9CA3AF;">—</span>';
-
-    const ctHtml = md.cycleTimes.size > 0
-      ? Array.from(md.cycleTimes).sort((a,b)=>a-b).map(v => `<span class="tag-ct">${v}s</span>`).join('')
-      : '<span style="color:#D1D5DB;font-size:11px;font-weight:500;">Not in dataset</span>';
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><span class="tag-machine" style="font-size:12px;padding:3px 9px;">${mac}</span></td>
-      <td>${proHtml}</td>
+  cntEl.textContent=macMap.size;
+  Array.from(macMap.keys()).sort().forEach(mac=>{
+    const md=macMap.get(mac);
+    const prodHtml=Array.from(md.products).sort().join(', ')||'<span style="color:#9CA3AF;">—</span>';
+    const supHtml=Array.from(md.supervisors).sort().join(', ')||'<span style="color:#9CA3AF;">—</span>';
+    let ctHtml='';
+    md.ctByProduct.forEach(ctSet=>Array.from(ctSet).sort((a,b)=>a-b).forEach(v=>{ctHtml+=`<span class="tag-ct">${v}s</span>`;}));
+    if(!ctHtml){
+      const fb=new Set();
+      records.forEach(row=>{
+        if((row['Machine']||'').trim()!==mac)return;
+        for(let k of Object.keys(row)){if(k.toLowerCase().includes('cycle')&&k.toLowerCase().includes('time')){const v=cleanNum(row[k]);if(v>0)fb.add(v);}}
+      });
+      if(fb.size)Array.from(fb).sort((a,b)=>a-b).forEach(v=>{ctHtml+=`<span class="tag-ct">${v}s</span>`;});
+    }
+    if(!ctHtml)ctHtml='<span style="color:#D1D5DB;font-size:11px;font-weight:500;">Not in dataset</span>';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="tag-machine">${mac}</span></td>
+      <td style="font-size:12.5px;font-weight:500;color:#1F2937;">${prodHtml}</td>
       <td style="color:#374151;font-weight:500;">${supHtml}</td>
       <td>${ctHtml}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-/* ══════════════ KPIs ══════════════ */
-function calcKPIs(records) {
-  const unit = s => ` <span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">${s}</span>`;
-  if(!records.length) {
-    ['kpiOEE','kpiAvailability','kpiPerformance','kpiQuality'].forEach(id => document.getElementById(id).textContent = '0.00%');
-    ['kpiTotalOutput','kpiGoodOutput','kpiTotalDowntime'].forEach(id => document.getElementById(id).innerHTML = '0');
-    document.getElementById('kpiPlannedDT').innerHTML = '0' + unit('Mins');
-    document.getElementById('kpiPlannedDTSource').textContent = '';
-    ['pOEE','pAvail','pPerf','pQual'].forEach(id => document.getElementById(id).style.width = '0%');
+/* ══════════════════════════
+   KPIs
+══════════════════════════ */
+function calcKPIs(records){
+  const u=s=>`<span style="font-size:11px;color:#6B7280;font-family:Inter,sans-serif;font-weight:500;">${s}</span>`;
+  if(!records.length){
+    ['kpiOEE','kpiAvailability','kpiPerformance','kpiQuality'].forEach(id=>document.getElementById(id).textContent='0.00%');
+    ['kpiTotalOutput','kpiGoodOutput','kpiTotalDowntime'].forEach(id=>document.getElementById(id).innerHTML='0');
+    document.getElementById('kpiPlannedDT').innerHTML='0 '+u('Mins');
+    document.getElementById('kpiPlannedDTSource').textContent='';
+    ['pOEE','pAvail','pPerf','pQual'].forEach(id=>document.getElementById(id).style.width='0%');
     return;
   }
-  let sO=0, sA=0, sP=0, sQ=0, tOut=0, tGood=0, tNPT=0, tPDT=0;
-  records.forEach(r => {
-    sO  += cleanNum(r['OEE%']); sA += cleanNum(r['Availability%']);
-    sP  += cleanNum(r['Performance%']); sQ += cleanNum(r['Quality%']);
-    tOut  += cleanNum(r['Actual Output (PCs)']);
-    tGood += cleanNum(r['Total Good Production (Pcs)']);
-    tNPT  += cleanNum(r['Total Unplanned Time (NPT) (Min.)']);
-    if(plannedDTCol) tPDT += cleanNum(r[plannedDTCol]);
+  let sO=0,sA=0,sP=0,sQ=0,tOut=0,tGood=0,tNPT=0,tPDT=0;
+  records.forEach(r=>{
+    sO+=cleanNum(r['OEE%']);sA+=cleanNum(r['Availability%']);sP+=cleanNum(r['Performance%']);sQ+=cleanNum(r['Quality%']);
+    tOut+=cleanNum(r['Actual Output (PCs)']);tGood+=cleanNum(r['Total Good Production (Pcs)']);
+    tNPT+=cleanNum(r['Total Unplanned Time (NPT) (Min.)']);
+    if(plannedDTCol)tPDT+=cleanNum(r[plannedDTCol]);
   });
-  const n = records.length;
-  const aO = sO/n, aA = sA/n, aP = sP/n, aQ = sQ/n;
-
-  document.getElementById('kpiOEE').textContent          = aO.toFixed(2) + '%';
-  document.getElementById('kpiAvailability').textContent = aA.toFixed(2) + '%';
-  document.getElementById('kpiPerformance').textContent  = aP.toFixed(2) + '%';
-  document.getElementById('kpiQuality').textContent      = aQ.toFixed(2) + '%';
-  document.getElementById('pOEE').style.width   = Math.min(aO, 100)  + '%';
-  document.getElementById('pAvail').style.width = Math.min(aA, 100) + '%';
-  document.getElementById('pPerf').style.width  = Math.min(aP, 100) + '%';
-  document.getElementById('pQual').style.width  = Math.min(aQ, 100) + '%';
-
-  document.getElementById('kpiTotalOutput').innerHTML   = tOut.toLocaleString()  + unit('Pcs');
-  document.getElementById('kpiGoodOutput').innerHTML    = tGood.toLocaleString() + unit('Pcs');
-  document.getElementById('kpiTotalDowntime').innerHTML = tNPT.toLocaleString()  + unit('Mins');
-
-  if(plannedDTCol) {
-    document.getElementById('kpiPlannedDT').innerHTML = tPDT.toLocaleString() + unit('Mins');
-    document.getElementById('kpiPlannedDTSource').textContent = '↳ ' + plannedDTCol;
-  } else {
-    document.getElementById('kpiPlannedDT').innerHTML = '<span style="font-size:12px;color:#9CA3AF;font-weight:500;">Not in dataset</span>';
-    document.getElementById('kpiPlannedDTSource').textContent = 'No column detected';
-  }
-
-  const badge = document.getElementById('badgeOEE');
-  badge.className = aO >= 0.85 ? 'ib ib-emerald' : aO >= 0.65 ? 'ib ib-amber' : 'ib ib-rose';
+  const n=records.length,aO=sO/n,aA=sA/n,aP=sP/n,aQ=sQ/n;
+  document.getElementById('kpiOEE').textContent=aO.toFixed(2)+'%';
+  document.getElementById('kpiAvailability').textContent=aA.toFixed(2)+'%';
+  document.getElementById('kpiPerformance').textContent=aP.toFixed(2)+'%';
+  document.getElementById('kpiQuality').textContent=aQ.toFixed(2)+'%';
+  document.getElementById('pOEE').style.width=Math.min(aO,100)+'%';
+  document.getElementById('pAvail').style.width=Math.min(aA,100)+'%';
+  document.getElementById('pPerf').style.width=Math.min(aP,100)+'%';
+  document.getElementById('pQual').style.width=Math.min(aQ,100)+'%';
+  document.getElementById('kpiTotalOutput').innerHTML=tOut.toLocaleString()+' '+u('Pcs');
+  document.getElementById('kpiGoodOutput').innerHTML=tGood.toLocaleString()+' '+u('Pcs');
+  document.getElementById('kpiTotalDowntime').innerHTML=tNPT.toLocaleString()+' '+u('Mins');
+  if(plannedDTCol){document.getElementById('kpiPlannedDT').innerHTML=tPDT.toLocaleString()+' '+u('Mins');document.getElementById('kpiPlannedDTSource').textContent='↳ '+plannedDTCol;}
+  else{document.getElementById('kpiPlannedDT').innerHTML='<span style="font-size:12px;color:#9CA3AF;font-weight:500;">Not in dataset</span>';document.getElementById('kpiPlannedDTSource').textContent='No column detected';}
+  const badge=document.getElementById('badgeOEE');
+  badge.className=aO>=0.85?'ib ib-emerald':aO>=0.65?'ib ib-amber':'ib ib-rose';
 }
 
-/* ══════════════ CHART INIT ══════════════ */
-const CB = { background: 'transparent', fontFamily: "'Inter', sans-serif", foreColor: '#374151' };
-const CG = { borderColor: '#F3F4F6', strokeDashArray: 4 };
-
-function initCharts() {
-  trendInst = new ApexCharts(document.querySelector('#trendChart'), {
-    chart:       { ...CB, height: 250, type: 'area', toolbar: { show: false } },
-    theme:       { mode: 'light' },
-    colors:      ['#6366F1','#3B82F6','#F59E0B','#14B8A6'],
-    dataLabels:  { enabled: false },
-    stroke:      { curve: 'smooth', width: 2 },
-    fill:        { type: 'gradient', gradient: { opacityFrom: .15, opacityTo: .01 } },
-    series:      [],
-    xaxis:       { categories: [], labels: { style: { colors: '#6B7280', fontSize: '10.5px', fontWeight: 500 } } },
-    yaxis:       { labels: { formatter: v => v.toFixed(2)+'%', style: { colors: '#6B7280', fontSize: '10.5px' } } },
-    grid:        CG,
-    tooltip:     { theme: 'light', y: { formatter: v => v.toFixed(2)+'%' } },
-    legend:      { labels: { colors: '#374151' }, fontSize: '12px', fontWeight: 600 }
+/* ══════════════════════════
+   CHART INIT
+══════════════════════════ */
+const CB={background:'transparent',fontFamily:"'Inter',sans-serif",foreColor:'#374151'};
+const CG={borderColor:'#F3F4F6',strokeDashArray:4};
+function initCharts(){
+  trendInst=new ApexCharts(document.querySelector('#trendChart'),{
+    chart:{...CB,height:250,type:'area',toolbar:{show:false}},theme:{mode:'light'},
+    colors:['#6366F1','#3B82F6','#F59E0B','#14B8A6'],dataLabels:{enabled:false},
+    stroke:{curve:'smooth',width:2},fill:{type:'gradient',gradient:{opacityFrom:.15,opacityTo:.01}},
+    series:[],xaxis:{categories:[],labels:{style:{colors:'#6B7280',fontSize:'10.5px',fontWeight:500}}},
+    yaxis:{labels:{formatter:v=>v.toFixed(2)+'%',style:{colors:'#6B7280',fontSize:'10.5px'}}},
+    grid:CG,tooltip:{theme:'light',y:{formatter:v=>v.toFixed(2)+'%'}},
+    legend:{labels:{colors:'#374151'},fontSize:'12px',fontWeight:600}
   });
   trendInst.render();
-
-  downtimeInst = new ApexCharts(document.querySelector('#downtimeChart'), {
-    chart:       { ...CB, height: 230, type: 'donut' },
-    theme:       { mode: 'light' },
-    colors:      DONUT_COLORS, labels: LOSS, series: [],
-    dataLabels:  { enabled: false },
-    stroke:      { colors: ['#ffffff'], width: 3 },
-    states:      { hover: { filter: { type: 'lighten', value: .05 } } },
-    plotOptions: { pie: { donut: { size: '78%', labels: { show: true,
-      name:  { show: true,  fontSize: '11px', color: '#6B7280',  offsetY: -6 },
-      value: { show: true,  fontSize: '18px', fontWeight: 700, color: '#111827', fontFamily: "'JetBrains Mono',monospace", offsetY: 4, formatter: v => v+' m' },
-      total: { show: true,  label: 'Total Lost', fontSize: '10px', color: '#6B7280', fontWeight: 700,
-               formatter: w => w.globals.seriesTotals.reduce((a,b)=>a+b,0)+' m' }
+  downtimeInst=new ApexCharts(document.querySelector('#downtimeChart'),{
+    chart:{...CB,height:230,type:'donut'},theme:{mode:'light'},
+    colors:DONUT_COLORS,labels:LOSS,series:[],dataLabels:{enabled:false},
+    stroke:{colors:['#fff'],width:3},states:{hover:{filter:{type:'lighten',value:.05}}},
+    plotOptions:{pie:{donut:{size:'78%',labels:{show:true,
+      name:{show:true,fontSize:'11px',color:'#6B7280',offsetY:-6},
+      value:{show:true,fontSize:'18px',fontWeight:700,color:'#111827',fontFamily:"'JetBrains Mono',monospace",offsetY:4,formatter:v=>v+' m'},
+      total:{show:true,label:'Total Lost',fontSize:'10px',color:'#6B7280',fontWeight:700,formatter:w=>w.globals.seriesTotals.reduce((a,b)=>a+b,0)+' m'}
     }}}},
-    tooltip:     { theme: 'light', y: { formatter: v => v+' min' } },
-    legend:      { show: false }
+    tooltip:{theme:'light',y:{formatter:v=>v+' min'}},legend:{show:false}
   });
   downtimeInst.render();
-
-  productInst = new ApexCharts(document.querySelector('#productChart'), {
-    chart:       { ...CB, height: 250, type: 'bar', toolbar: { show: false } },
-    theme:       { mode: 'light' },
-    colors:      ['#E0E7FF','#6366F1'],
-    plotOptions: { bar: { horizontal: false, columnWidth: '45%', borderRadius: 5 } },
-    dataLabels:  { enabled: false },
-    series:      [], grid: CG,
-    xaxis:       { categories: [], labels: { rotate: -15, style: { fontSize: '10.5px', colors: '#6B7280', fontWeight: 500 } } },
-    yaxis:       { labels: { style: { colors: '#6B7280', fontSize: '10.5px' } } },
-    legend:      { position: 'top', labels: { colors: '#374151' }, fontSize: '12px', fontWeight: 600 }
+  productInst=new ApexCharts(document.querySelector('#productChart'),{
+    chart:{...CB,height:250,type:'bar',toolbar:{show:false}},theme:{mode:'light'},
+    colors:['#E0E7FF','#6366F1'],plotOptions:{bar:{horizontal:false,columnWidth:'45%',borderRadius:5}},
+    dataLabels:{enabled:false},series:[],grid:CG,
+    xaxis:{categories:[],labels:{rotate:-15,style:{fontSize:'10.5px',colors:'#6B7280',fontWeight:500}}},
+    yaxis:{labels:{style:{colors:'#6B7280',fontSize:'10.5px'}}},
+    legend:{position:'top',labels:{colors:'#374151'},fontSize:'12px',fontWeight:600}
   });
   productInst.render();
 }
 
-/* ══════════════ CHART UPDATES ══════════════ */
-function updateTrend(records) {
-  const dg = {};
-  records.forEach(r => {
-    const d = r['Date'];
-    if(!dg[d]) dg[d] = {o:0,a:0,p:0,q:0,n:0};
-    dg[d].o += cleanNum(r['OEE%']); dg[d].a += cleanNum(r['Availability%']);
-    dg[d].p += cleanNum(r['Performance%']); dg[d].q += cleanNum(r['Quality%']); dg[d].n++;
-  });
-  const dates = Object.keys(dg).sort((a,b) => new Date(a)-new Date(b));
-  trendInst.updateOptions({ xaxis: { categories: dates }, series: [
-    { name: 'OEE Total',    data: dates.map(d => +(dg[d].o/dg[d].n).toFixed(2)) },
-    { name: 'Availability', data: dates.map(d => +(dg[d].a/dg[d].n).toFixed(2)) },
-    { name: 'Performance',  data: dates.map(d => +(dg[d].p/dg[d].n).toFixed(2)) },
-    { name: 'Quality',      data: dates.map(d => +(dg[d].q/dg[d].n).toFixed(2)) }
+/* ══════════════════════════
+   CHART UPDATES
+══════════════════════════ */
+function updateTrend(records){
+  const dg={};
+  records.forEach(r=>{const d=r['Date'];if(!dg[d])dg[d]={o:0,a:0,p:0,q:0,n:0};dg[d].o+=cleanNum(r['OEE%']);dg[d].a+=cleanNum(r['Availability%']);dg[d].p+=cleanNum(r['Performance%']);dg[d].q+=cleanNum(r['Quality%']);dg[d].n++;});
+  const dates=Object.keys(dg).sort((a,b)=>new Date(a)-new Date(b));
+  trendInst.updateOptions({xaxis:{categories:dates},series:[
+    {name:'OEE Total',data:dates.map(d=>+(dg[d].o/dg[d].n).toFixed(2))},
+    {name:'Availability',data:dates.map(d=>+(dg[d].a/dg[d].n).toFixed(2))},
+    {name:'Performance',data:dates.map(d=>+(dg[d].p/dg[d].n).toFixed(2))},
+    {name:'Quality',data:dates.map(d=>+(dg[d].q/dg[d].n).toFixed(2))}
   ]});
 }
-
-function updateDowntime(records) {
-  const sums  = LOSS.map(m => records.reduce((acc,r) => acc+cleanNum(r[m]), 0));
-  const total = sums.reduce((a,b)=>a+b, 0);
-  if(!total) {
-    downtimeInst.updateOptions({ series: [], noData: { text: 'No Downtime Registered', style: { color: '#9CA3AF' } } });
-    document.getElementById('downtimeLegend').innerHTML = '<div style="text-align:center;color:#9CA3AF;font-size:12px;font-weight:500;padding:20px 0;">No downtime data</div>';
-    return;
-  }
+function updateDowntime(records){
+  const sums=LOSS.map(m=>records.reduce((acc,r)=>acc+cleanNum(r[m]),0));
+  const total=sums.reduce((a,b)=>a+b,0);
+  if(!total){downtimeInst.updateOptions({series:[],noData:{text:'No Downtime Registered',style:{color:'#9CA3AF'}}});document.getElementById('downtimeLegend').innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:12px;font-weight:500;padding:20px 0;">No downtime data</div>';return;}
   downtimeInst.updateSeries(sums);
-  const legend = document.getElementById('downtimeLegend');
-  legend.innerHTML = '';
-  LOSS.map((l,i) => ({ label:l, val:sums[i], color:DONUT_COLORS[i] }))
-      .filter(x => x.val > 0).sort((a,b) => b.val-a.val)
-      .forEach(item => {
-        const pct = ((item.val/total)*100).toFixed(1);
-        legend.innerHTML += `<div class="dl-row"><div class="dl-dot" style="background:${item.color};"></div><span class="dl-label" title="${item.label}">${item.label}</span><span class="dl-val">${item.val}</span><span class="dl-pct">${pct}%</span></div>`;
-      });
-}
-
-function updateProductChart(records) {
-  const pg = {};
-  records.forEach(r => {
-    const p = r['Product Criteria'] || 'Unknown SKU';
-    if(!pg[p]) pg[p] = {t:0,a:0};
-    pg[p].t += cleanNum(r['Shift Target (PCs)']); pg[p].a += cleanNum(r['Actual Output (PCs)']);
+  const legend=document.getElementById('downtimeLegend');legend.innerHTML='';
+  LOSS.map((l,i)=>({label:l,val:sums[i],color:DONUT_COLORS[i]})).filter(x=>x.val>0).sort((a,b)=>b.val-a.val).forEach(item=>{
+    const pct=((item.val/total)*100).toFixed(1);
+    legend.innerHTML+=`<div class="dl-row"><div class="dl-dot" style="background:${item.color};"></div><span class="dl-label" title="${item.label}">${item.label}</span><span class="dl-val">${item.val}</span><span class="dl-pct">${pct}%</span></div>`;
   });
-  const prods = Object.keys(pg).sort((a,b) => pg[b].a-pg[a].a);
-  productInst.updateOptions({ xaxis: { categories: prods }, series: [
-    { name: 'Shift Targets', data: prods.map(p => pg[p].t) },
-    { name: 'Actual Yields', data: prods.map(p => pg[p].a) }
-  ]});
+}
+function updateProductChart(records){
+  const pg={};
+  records.forEach(r=>{const p=r['Product Criteria']||'Unknown SKU';if(!pg[p])pg[p]={t:0,a:0};pg[p].t+=cleanNum(r['Shift Target (PCs)']);pg[p].a+=cleanNum(r['Actual Output (PCs)']);});
+  const prods=Object.keys(pg).sort((a,b)=>pg[b].a-pg[a].a);
+  productInst.updateOptions({xaxis:{categories:prods},series:[{name:'Shift Targets',data:prods.map(p=>pg[p].t)},{name:'Actual Yields',data:prods.map(p=>pg[p].a)}]});
 }
 
-/* ══════════════ TABLE ══════════════ */
-function populateTable(records) {
-  const tbody = document.getElementById('productionTableBody');
-  tbody.innerHTML = '';
-  if(!records.length) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:#9CA3AF;font-size:13px;">
-      <i class="fa-solid fa-folder-open" style="font-size:18px;display:block;margin-bottom:8px;color:#D1D5DB;"></i>
-      No records found matching criteria.</td></tr>`;
-    return;
-  }
-  records.forEach(row => {
-    const oeeRaw = cleanNum(row['OEE%']);
-    const cls    = oeeRaw >= 0.85 ? 'oee-good' : oeeRaw >= 0.65 ? 'oee-warn' : 'oee-bad';
-    const tr     = document.createElement('tr');
-    tr.innerHTML = `
+/* ══════════════════════════
+   TABLE
+══════════════════════════ */
+function populateTable(records){
+  const tbody=document.getElementById('productionTableBody');tbody.innerHTML='';
+  if(!records.length){tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px;color:#9CA3AF;font-size:13px;"><i class="fa-solid fa-folder-open" style="font-size:18px;display:block;margin-bottom:8px;color:#D1D5DB;"></i>No records found matching criteria.</td></tr>`;return;}
+  records.forEach(row=>{
+    const oeeRaw=cleanNum(row['OEE%']);
+    const cls=oeeRaw>=0.85?'oee-good':oeeRaw>=0.65?'oee-warn':'oee-bad';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
       <td style="font-weight:600;color:#111827;white-space:nowrap;">${row['Date']||'—'}</td>
       <td><span class="tag-machine">${row['Machine']||'N/A'}</span></td>
       <td style="color:#374151;font-weight:500;">${row['Shift']||'—'}</td>
@@ -1129,11 +976,23 @@ function populateTable(records) {
     tbody.appendChild(tr);
   });
 }
-
-function searchTable() {
-  const q = document.getElementById('tableSearch').value.toLowerCase();
+function searchTable(){
+  const q=document.getElementById('tableSearch').value.toLowerCase();
   for(let r of document.getElementById('productionTableBody').getElementsByTagName('tr'))
-    r.style.display = (r.textContent.toLowerCase().includes(q) || r.innerHTML.includes('colspan')) ? '' : 'none';
+    r.style.display=(r.textContent.toLowerCase().includes(q)||r.innerHTML.includes('colspan'))?'':'none';
+}
+
+/* ══════════════════════════
+   REFRESH
+══════════════════════════ */
+function refreshData(){
+  const btn=document.getElementById('btnRefresh');
+  btn.disabled=true;btn.classList.add('spinning');
+  dashboardData=[];dataDatesSet=new Set();
+  ['filterShift'].forEach(id=>{const s=document.getElementById(id);while(s.options.length>1)s.remove(1);});
+  document.getElementById('productionTableBody').innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px;color:#9CA3AF;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:18px;display:block;margin-bottom:8px;color:#A5B4FC;"></i>Refreshing data...</td></tr>`;
+  fetchData();
+  setTimeout(()=>{btn.disabled=false;btn.classList.remove('spinning');},3000);
 }
 </script>
 </body>
