@@ -772,6 +772,8 @@ function resetFilters(){
 
 function renderDashboard(){
   const fS=document.getElementById('filterShift').value;
+
+  // Main filter — date range + shift — for KPIs, cards, donut, bar chart, table
   const fil=dashboardData.filter(r=>{
     if(fS!=='All'&&r['Shift']?.trim()!==fS)return false;
     if(r._dateObj){
@@ -780,7 +782,22 @@ function renderDashboard(){
     }
     return true;
   });
-  updateCards(fil);calcKPIs(fil);updateTrend(fil);
+
+  // Trend filter — expands selection to full month(s) so every day in the
+  // month is visible in the chart regardless of the specific day range chosen
+  const trendFil=dashboardData.filter(r=>{
+    if(fS!=='All'&&r['Shift']?.trim()!==fS)return false;
+    if(r._dateObj&&selStart){
+      const tStart=new Date(selStart.getFullYear(),selStart.getMonth(),1);
+      const tEnd=selEnd
+        ?new Date(selEnd.getFullYear(),selEnd.getMonth()+1,0)
+        :new Date(selStart.getFullYear(),selStart.getMonth()+1,0);
+      if(r._dateObj<tStart||r._dateObj>tEnd)return false;
+    }
+    return true;
+  });
+
+  updateCards(fil);calcKPIs(fil);updateTrend(trendFil);
   updateDowntime(fil);updateProductChart(fil);populateTable(fil);
   updateCalLabel();
 }
