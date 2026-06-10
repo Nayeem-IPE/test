@@ -867,8 +867,9 @@ function initCharts(){
     chart:{...CB,height:250,type:'bar',toolbar:{show:false}},theme:{mode:'light'},
     colors:['#E0E7FF','#6366F1'],plotOptions:{bar:{horizontal:false,columnWidth:'45%',borderRadius:5}},
     dataLabels:{enabled:false},series:[],grid:CG,
-    xaxis:{categories:[],labels:{rotate:-15,style:{fontSize:'10.5px',colors:'#6B7280',fontWeight:500}}},
-    yaxis:{labels:{style:{colors:'#6B7280',fontSize:'10.5px'}}},
+    xaxis:{categories:[],labels:{rotate:-15,style:{fontSize:'10.5px',colors:'#6B7280',fontWeight:500},formatter:v=>v&&v.length>12?v.slice(0,12)+'…':v}},
+    yaxis:{labels:{formatter:v=>Math.round(v).toLocaleString(),style:{colors:'#6B7280',fontSize:'10.5px'}}},
+    tooltip:{theme:'light',y:{formatter:v=>v.toLocaleString()+' Pcs'}},
     legend:{position:'top',labels:{colors:'#374151'},fontSize:'12px',fontWeight:600}
   });
   productInst.render();
