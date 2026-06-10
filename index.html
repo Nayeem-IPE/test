@@ -113,74 +113,93 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 .btn-refresh:active{transform:scale(.97);}
 .btn-refresh.spinning i{animation:spinRing 1s linear infinite;}
 
-/* ═══════ CALENDAR PICKER ═══════ */
-.cal-wrap{position:relative;display:inline-block;}
-.cal-trigger{
-  display:inline-flex;align-items:center;gap:8px;
+/* ═══════ CALENDAR TRIGGER ═══════ */
+.cal-trigger-btn{
+  display:inline-flex;align-items:center;gap:7px;
   background:#F9FAFB;border:1.5px solid #D1D5DB;border-radius:9px;
-  color:#111827;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
-  padding:8px 14px;cursor:pointer;white-space:nowrap;user-select:none;
+  color:#111827;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;
+  padding:6px 12px;cursor:pointer;white-space:nowrap;
   transition:all .15s;
 }
-.cal-trigger:hover,.cal-trigger.open{border-color:#6366F1;background:#EEF2FF;color:#4338CA;box-shadow:0 0 0 3px rgba(99,102,241,.1);}
-.cal-trigger .cal-chevron{font-size:9px;color:#9CA3AF;transition:transform .2s;}
-.cal-trigger.open .cal-chevron{transform:rotate(180deg);}
+.cal-trigger-btn:hover,.cal-trigger-btn.open{border-color:#6366F1;background:#EEF2FF;color:#4338CA;}
+.cal-chev{font-size:8px;color:#9CA3AF;transition:transform .25s;}
+.cal-chev.open{transform:rotate(180deg);}
 
-.cal-dropdown{
-  position:fixed;top:0;left:0;z-index:9998;
-  background:#fff;border:1px solid #E5E7EB;border-radius:20px;
-  box-shadow:0 24px 64px rgba(17,24,39,.14),0 6px 20px rgba(99,102,241,.09);
-  padding:20px;width:310px;
-  display:none;
+/* ═══════ CALENDAR CARD — compact inline ═══════ */
+.cal-card-wrap{
+  overflow:hidden;max-height:0;
+  transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .2s ease;
+  opacity:0;
 }
-.cal-dropdown.open{display:block;animation:calDrop .22s cubic-bezier(.22,1,.36,1);}
-@keyframes calDrop{from{opacity:0;transform:translateY(-10px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+.cal-card-wrap.open{max-height:300px;opacity:1;}
 
-/* Nav row */
-.cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.cal-nav-btn{width:30px;height:30px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;font-size:11px;transition:background .12s;}
+.cal-inner{
+  display:inline-block;           /* shrink-wrap to content */
+  background:#fff;border:1px solid #E5E7EB;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(17,24,39,.07);
+  padding:14px 16px;
+}
+
+/* Nav */
+.cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;}
+.cal-nav-btn{
+  width:26px;height:26px;border-radius:7px;background:#F3F4F6;
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:#374151;font-size:10px;transition:background .12s;flex-shrink:0;
+}
 .cal-nav-btn:hover{background:#E5E7EB;}
-.cal-month-lbl{font-size:14px;font-weight:800;color:#111827;letter-spacing:-.01em;}
+.cal-month-lbl{font-size:12px;font-weight:800;color:#111827;letter-spacing:-.01em;white-space:nowrap;}
 
-/* Day-of-week headers */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cal-dow{font-size:9.5px;font-weight:700;color:#9CA3AF;text-align:center;padding:2px 0 8px;text-transform:uppercase;}
-
-/* Day cells */
+/* Grid */
+.cal-grid{
+  display:grid;grid-template-columns:repeat(7,30px);
+  gap:2px;margin-bottom:10px;
+}
+.cal-dow{
+  width:30px;height:20px;
+  font-size:9px;font-weight:700;color:#9CA3AF;
+  display:flex;align-items:center;justify-content:center;text-transform:uppercase;
+}
 .cal-day{
-  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  font-size:12.5px;font-weight:500;color:#374151;
-  border-radius:8px;cursor:pointer;position:relative;
-  transition:background .1s,color .1s;
+  width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11.5px;font-weight:500;color:#374151;
+  border-radius:7px;cursor:pointer;position:relative;
+  transition:background .1s,color .1s;user-select:none;
 }
 .cal-day:hover:not(.empty):not(.no-data){background:#EEF2FF;color:#4338CA;}
 .cal-day.empty{cursor:default;pointer-events:none;}
-.cal-day.no-data{color:#D1D5DB;cursor:not-allowed;}
+.cal-day.no-data{color:#D1D5DB;cursor:default;pointer-events:none;}
+.cal-day.today::after{
+  content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
+  width:3px;height:3px;border-radius:50%;background:#6366F1;
+}
+.cal-day.in-range{background:#EEF2FF;color:#4338CA;border-radius:0;}
+.cal-day.range-left{border-radius:7px 0 0 7px!important;}
+.cal-day.range-right{border-radius:0 7px 7px 0!important;}
+.cal-day.sel-start,.cal-day.sel-end{
+  background:#6366F1!important;color:#fff!important;font-weight:700;z-index:1;
+}
+.cal-day.sel-start{border-radius:7px 0 0 7px;}
+.cal-day.sel-end{border-radius:0 7px 7px 0;}
+.cal-day.sel-start.sel-end{border-radius:7px!important;}
 
-/* Today dot */
-.cal-day.today::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#6366F1;}
-
-/* Has-data green dot */
-.cal-day.has-data::before{content:'';position:absolute;top:3px;right:3px;width:4px;height:4px;border-radius:50%;background:#10B981;}
-
-/* Range */
-.cal-day.in-range:not(.sel-start):not(.sel-end){background:#EEF2FF;color:#4338CA;border-radius:0;}
-.cal-day.in-range.range-start-edge{border-radius:8px 0 0 8px;}
-.cal-day.in-range.range-end-edge{border-radius:0 8px 8px 0;}
-.cal-day.sel-start{background:#6366F1!important;color:#fff!important;font-weight:700;border-radius:8px 0 0 8px;}
-.cal-day.sel-end{background:#6366F1!important;color:#fff!important;font-weight:700;border-radius:0 8px 8px 0;}
-.cal-day.sel-start.sel-end{border-radius:8px!important;}
-
-/* Quick buttons */
-.cal-quick-row{display:flex;gap:5px;margin-top:14px;flex-wrap:wrap;}
-.cal-qbtn{flex:1;min-width:0;padding:6px 4px;border-radius:8px;background:#F3F4F6;border:1px solid #E5E7EB;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#374151;cursor:pointer;transition:all .12s;text-align:center;white-space:nowrap;}
+/* Quick row */
+.cal-quick-row{
+  display:flex;gap:4px;flex-wrap:wrap;
+  padding-top:10px;border-top:1px solid #F3F4F6;
+}
+.cal-qbtn{
+  padding:3px 10px;border-radius:20px;background:#F3F4F6;
+  border:1.5px solid #E5E7EB;font-family:'Inter',sans-serif;
+  font-size:10.5px;font-weight:600;color:#374151;cursor:pointer;transition:all .12s;
+}
 .cal-qbtn:hover{background:#EEF2FF;border-color:#C7D2FE;color:#4338CA;}
 .cal-qbtn.active{background:#EEF2FF;border-color:#6366F1;color:#4338CA;}
 
-/* Calendar selected range display */
-.cal-selected-info{margin-top:14px;padding:10px 12px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;display:none;}
-.cal-selected-info.visible{display:block;}
-.cal-selected-info p{font-size:11px;font-weight:600;color:#4C1D95;}
+#calRangeLabel{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
 
 /* ═══════ SEARCH ═══════ */
 .f-search{background:#F9FAFB;border:1.5px solid #D1D5DB;border-radius:9px;color:#111827;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:7px 12px 7px 34px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s;}
@@ -264,53 +283,23 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 <!-- ══════════ MAIN ══════════ -->
 <main class="max-w-7xl mx-auto px-5 py-6 space-y-4">
 
-  <!-- ── FILTER BAR (Calendar + Shift) ── -->
+  <!-- ── FILTER BAR ── -->
   <section class="card-flat fu">
     <div class="filter-bar">
       <i class="fa-solid fa-calendar-days" style="color:#6366F1;font-size:12px;flex-shrink:0;"></i>
       <span class="label" style="white-space:nowrap;flex-shrink:0;">Date Range</span>
       <div class="filter-sep"></div>
 
-      <!-- Calendar Picker -->
-      <div class="cal-wrap" id="calWrap">
-        <button class="cal-trigger" id="calTrigger" onclick="toggleCal(event)">
-          <i class="fa-regular fa-calendar" style="color:#6366F1;font-size:12px;"></i>
-          <span id="calLabel">All Dates</span>
-          <i class="fa-solid fa-chevron-down cal-chevron"></i>
-        </button>
-
-        <div class="cal-dropdown" id="calDropdown">
-          <!-- Month navigation -->
-          <div class="cal-nav-row">
-            <button class="cal-nav-btn" onclick="calNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-            <span class="cal-month-lbl" id="calMonthLbl">—</span>
-            <button class="cal-nav-btn" onclick="calNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
-          </div>
-
-          <!-- Day grid -->
-          <div class="cal-grid" id="calGrid">
-            <div class="cal-dow">Mo</div><div class="cal-dow">Tu</div><div class="cal-dow">We</div>
-            <div class="cal-dow">Th</div><div class="cal-dow">Fr</div><div class="cal-dow">Sa</div><div class="cal-dow">Su</div>
-          </div>
-
-          <!-- Quick buttons -->
-          <div class="cal-quick-row">
-            <button class="cal-qbtn" id="qToday"   onclick="calQuick('today')">Today</button>
-            <button class="cal-qbtn" id="qWeek"    onclick="calQuick('week')">This Week</button>
-            <button class="cal-qbtn" id="qMonth"   onclick="calQuick('month')">This Month</button>
-            <button class="cal-qbtn" id="qAll"     onclick="calQuick('all')">All Time</button>
-          </div>
-
-          <!-- Selected range display -->
-          <div class="cal-selected-info" id="calSelInfo">
-            <p id="calSelText"></p>
-          </div>
-        </div>
-      </div>
+      <!-- Calendar trigger -->
+      <button class="cal-trigger-btn" id="calTriggerBtn" onclick="toggleCalCard()">
+        <i class="fa-regular fa-calendar" style="color:#6366F1;font-size:12px;"></i>
+        <span id="calRangeLabel">All Dates</span>
+        <i class="fa-solid fa-chevron-down cal-chev" id="calChev"></i>
+      </button>
 
       <div class="filter-sep"></div>
 
-      <!-- Shift filter -->
+      <!-- Shift -->
       <div style="display:flex;align-items:center;gap:6px;">
         <i class="fa-solid fa-layer-group" style="color:#6B7280;font-size:11px;flex-shrink:0;"></i>
         <select id="filterShift" class="f-select"><option value="All">All Shifts</option></select>
@@ -322,9 +311,32 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
     </div>
   </section>
 
+  <!-- ── INLINE CALENDAR CARD ── -->
+  <div class="cal-card-wrap" id="calCardWrap">
+    <div class="cal-inner">
+      <div class="cal-nav-row">
+        <button class="cal-nav-btn" onclick="calNav(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <span class="cal-month-lbl" id="calMonthLbl">—</span>
+        <button class="cal-nav-btn" onclick="calNav(1)"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="cal-grid" id="calGrid">
+        <div class="cal-dow">Mo</div><div class="cal-dow">Tu</div><div class="cal-dow">We</div>
+        <div class="cal-dow">Th</div><div class="cal-dow">Fr</div><div class="cal-dow">Sa</div><div class="cal-dow">Su</div>
+      </div>
+      <div class="cal-quick-row">
+        <button class="cal-qbtn active" id="cq-all"       onclick="calQuick('all')">All Time</button>
+        <button class="cal-qbtn"        id="cq-today"     onclick="calQuick('today')">Today</button>
+        <button class="cal-qbtn"        id="cq-yesterday" onclick="calQuick('yesterday')">Yesterday</button>
+        <button class="cal-qbtn"        id="cq-week"      onclick="calQuick('week')">This Week</button>
+        <button class="cal-qbtn"        id="cq-month"     onclick="calQuick('month')">This Month</button>
+        <button class="cal-qbtn"        id="cq-lmonth"    onclick="calQuick('last-month')">Last Month</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ── OPERATIONAL MINI-CARDS ── -->
   <section class="fu fu-1">
-    <div class="card" style="padding:16px;display:flex;align-items:center;gap:14px;max-width:320px;">
+    <div class="card" style="padding:16px;display:flex;align-items:center;gap:14px;">
       <div class="ib ib-indigo"><i class="fa-solid fa-screwdriver-wrench"></i></div>
       <div>
         <div class="label">Active Machines Run</div>
@@ -471,7 +483,6 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 const csvUrl="https://docs.google.com/spreadsheets/d/e/2PACX-1vT278Z7eDyGDEydyjtAkK0xGD0Y9y5GmAw8DJcFsLyX1agdEE-UD7hQdEZZvsmkU68CuK0BOfvZi1vk/pub?gid=78827421&single=true&output=csv";
 let dashboardData=[],cycleTimeCol=null,plannedDTCol=null;
 let trendInst=null,downtimeInst=null,productInst=null;
-const MONTH_FULL=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const MONTH_SHORT=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const LOSS=['Utility (Gas)','Utility (Electricity)','Unavailable Order','Raw Material Shortage','Manpower Shortage','QCO (Quick change over)','In Process Setup/Adjustment','Mechanical Breakdown','Electrical Breakdown','Others down time'];
 const DONUT_COLORS=['#EF4444','#F97316','#F59E0B','#EAB308','#84CC16','#10B981','#06B6D4','#3B82F6','#6366F1','#A855F7'];
@@ -491,44 +502,35 @@ function detectPlannedDTCol(h){
   return h.find(x=>{const l=x.toLowerCase();return l.includes('planned')&&(l.includes('down')||l.includes('npt')||l.includes('maintenance')||l.includes('time'));})||null;
 }
 
+
 /* ══════════════════════════
-   CALENDAR STATE & LOGIC
+   CALENDAR STATE
 ══════════════════════════ */
-let calOpen=false, calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
-let selStart=null, selEnd=null, selPickingEnd=false, hoverDate=null;
-let dataDatesSet=new Set(); // string keys "YYYY-MM-DD"
+let selStart=null, selEnd=null, selPickingEnd=false;
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+let calCardOpen=false;
+let dataDatesSet=new Set();
 
-function positionCal(){
-  const trigger=document.getElementById('calTrigger');
-  const dropdown=document.getElementById('calDropdown');
-  const rect=trigger.getBoundingClientRect();
-  const dropW=310;
-  // Align left edge with trigger; if it overflows viewport right, shift left
-  let left=rect.left;
-  if(left+dropW>window.innerWidth-8)left=window.innerWidth-dropW-8;
-  dropdown.style.top=(rect.bottom+8)+'px';
-  dropdown.style.left=left+'px';
+/* ── Toggle the inline calendar card ── */
+function toggleCalCard(){
+  calCardOpen=!calCardOpen;
+  const wrap=document.getElementById('calCardWrap');
+  const chev=document.getElementById('calChev');
+  const btn=document.getElementById('calTriggerBtn');
+  wrap.classList.toggle('open',calCardOpen);
+  chev.classList.toggle('open',calCardOpen);
+  btn.classList.toggle('open',calCardOpen);
+  if(calCardOpen)renderCalGrid();
 }
-function toggleCal(e){
-  e.stopPropagation();
-  calOpen=!calOpen;
-  const dropdown=document.getElementById('calDropdown');
-  const trigger=document.getElementById('calTrigger');
-  if(calOpen){positionCal();dropdown.classList.add('open');trigger.classList.add('open');renderCalGrid();}
-  else{dropdown.classList.remove('open');trigger.classList.remove('open');}
-}
-function closeCal(){
-  calOpen=false;
-  document.getElementById('calDropdown').classList.remove('open');
-  document.getElementById('calTrigger').classList.remove('open');
-}
-document.addEventListener('click',e=>{
-  const wrap=document.getElementById('calWrap');
-  if(wrap&&!wrap.contains(e.target)&&!document.getElementById('calDropdown').contains(e.target))closeCal();
-});
-window.addEventListener('scroll',()=>{if(calOpen)positionCal();},{passive:true});
-window.addEventListener('resize',()=>{if(calOpen)positionCal();},{passive:true});
 
+function closeCalCard(){
+  calCardOpen=false;
+  document.getElementById('calCardWrap').classList.remove('open');
+  document.getElementById('calChev').classList.remove('open');
+  document.getElementById('calTriggerBtn').classList.remove('open');
+}
+
+/* ── Month navigation ── */
 function calNav(dir){
   calMonth+=dir;
   if(calMonth>11){calMonth=0;calYear++;}
@@ -536,147 +538,134 @@ function calNav(dir){
   renderCalGrid();
 }
 
+/* ── Render the day grid for current calYear/calMonth ── */
 function renderCalGrid(){
-  document.getElementById('calMonthLbl').textContent=`${MONTH_FULL[calMonth]} ${calYear}`;
-  const today=new Date();today.setHours(0,0,0,0);
+  const FULL_MONTHS=["January","February","March","April","May","June",
+                     "July","August","September","October","November","December"];
+  document.getElementById('calMonthLbl').textContent=`${FULL_MONTHS[calMonth]} ${calYear}`;
+
+  const today=new Date(); today.setHours(0,0,0,0);
   const firstDOW=new Date(calYear,calMonth,1).getDay(); // 0=Sun
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
-  const offset=(firstDOW===0)?6:firstDOW-1; // Mon-based
+  const offset=(firstDOW===0)?6:firstDOW-1; // Mon-based grid
 
-  // Remove old day cells (keep DOW headers = first 7 children)
   const grid=document.getElementById('calGrid');
-  while(grid.children.length>7)grid.removeChild(grid.lastChild);
+  // Remove old day cells (keep 7 DOW header divs)
+  while(grid.children.length>7) grid.removeChild(grid.lastChild);
 
-  // Empty prefix cells
+  // Empty leading cells
   for(let i=0;i<offset;i++){
-    const e=document.createElement('div');e.className='cal-day empty';grid.appendChild(e);
+    const e=document.createElement('div'); e.className='cal-day empty'; grid.appendChild(e);
   }
 
   // Day cells
   for(let d=1;d<=daysInMonth;d++){
     const dateKey=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dateObj=new Date(calYear,calMonth,d);dateObj.setHours(0,0,0,0);
-    const cell=document.createElement('div');
-    let cls='cal-day';
-    const hasData=dataDatesSet.has(dateKey);
-    if(!hasData)cls+=' no-data';
-    else cls+=' has-data';
-    if(dateObj.getTime()===today.getTime())cls+=' today';
-
-    // Range highlight
+    const dateObj=new Date(calYear,calMonth,d); dateObj.setHours(0,0,0,0);
     const ts=dateObj.getTime();
-    const startTs=selStart?selStart.getTime():null;
-    const endTs=selEnd?selEnd.getTime():null;
-    const hoverTs=hoverDate?hoverDate.getTime():null;
 
-    // While picking end, show preview range
-    const previewEnd=selPickingEnd&&hoverTs?hoverTs:endTs;
-    const rangeMin=startTs&&previewEnd?Math.min(startTs,previewEnd):startTs;
-    const rangeMax=startTs&&previewEnd?Math.max(startTs,previewEnd):previewEnd;
+    let cls='cal-day';
+    if(!dataDatesSet.has(dateKey)) cls+=' no-data';
+    if(dateObj.getTime()===today.getTime()) cls+=' today';
 
-    if(startTs&&ts===startTs)cls+=ts===rangeMax?' sel-start sel-end':' sel-start';
-    else if(rangeMax&&ts===rangeMax)cls+=' sel-end';
-    else if(rangeMin&&rangeMax&&ts>rangeMin&&ts<rangeMax)cls+=' in-range';
+    // Range classes
+    const sTs=selStart?selStart.getTime():null;
+    const eTs=selEnd?selEnd.getTime():null;
+    if(sTs&&ts===sTs&&eTs&&ts===eTs) cls+=' sel-start sel-end';
+    else if(sTs&&ts===sTs) cls+=eTs?' sel-start range-left':' sel-start sel-end';
+    else if(eTs&&ts===eTs) cls+=' sel-end range-right';
+    else if(sTs&&eTs&&ts>sTs&&ts<eTs){
+      cls+=' in-range';
+      if(ts===sTs+86400000) cls+=' range-left';
+      if(ts===eTs-86400000) cls+=' range-right';
+    }
 
-    cell.className=cls;
-    cell.textContent=d;
-    cell.dataset.date=dateKey;
-    cell.dataset.ts=dateObj.getTime();
-    if(hasData){
-      cell.onclick=()=>calSelect(dateObj);
-      cell.onmouseover=()=>{if(selPickingEnd){hoverDate=dateObj;renderCalGrid();}};
-      cell.onmouseout=()=>{if(selPickingEnd){hoverDate=null;renderCalGrid();}};
+    const cell=document.createElement('div');
+    cell.className=cls; cell.textContent=d;
+
+    if(dataDatesSet.has(dateKey)){
+      cell.onclick=()=>calDayClick(dateObj);
     }
     grid.appendChild(cell);
   }
-  updateCalSelectedInfo();
-  updateQuickBtnStates();
+  updateCalLabel();
+  updateCalQuickBtns();
 }
 
-function calSelect(dateObj){
+/* ── Handle day click (start → end → apply) ── */
+function calDayClick(dateObj){
   if(!selStart||!selPickingEnd){
-    // First click: set start
-    selStart=new Date(dateObj.getTime());
-    selEnd=null;
-    selPickingEnd=true;
+    selStart=new Date(dateObj); selEnd=null; selPickingEnd=true;
   } else {
-    // Second click: set end
-    selEnd=new Date(dateObj.getTime());
+    selEnd=new Date(dateObj);
+    if(selStart>selEnd){const t=selStart;selStart=selEnd;selEnd=t;}
     selPickingEnd=false;
-    hoverDate=null;
-    // Ensure start <= end
-    if(selStart>selEnd){const tmp=selStart;selStart=selEnd;selEnd=tmp;}
-    closeCal();
+    closeCalCard();
     renderDashboard();
   }
   renderCalGrid();
-  updateCalLabel();
 }
 
+/* ── Quick range buttons ── */
 function calQuick(type){
-  const now=new Date();now.setHours(0,0,0,0);
-  selPickingEnd=false;hoverDate=null;
-  if(type==='today'){selStart=new Date(now);selEnd=new Date(now);}
+  const now=new Date(); now.setHours(0,0,0,0);
+  selPickingEnd=false;
+  if(type==='all'){ selStart=null; selEnd=null; }
+  else if(type==='today'){ selStart=new Date(now); selEnd=new Date(now); }
+  else if(type==='yesterday'){ const y=new Date(now); y.setDate(now.getDate()-1); selStart=y; selEnd=new Date(y); }
   else if(type==='week'){
     const dow=now.getDay()===0?6:now.getDay()-1;
-    selStart=new Date(now);selStart.setDate(now.getDate()-dow);
-    selEnd=new Date(now);
+    selStart=new Date(now); selStart.setDate(now.getDate()-dow); selEnd=new Date(now);
   }
   else if(type==='month'){
     selStart=new Date(now.getFullYear(),now.getMonth(),1);
     selEnd=new Date(now.getFullYear(),now.getMonth()+1,0);
   }
-  else{selStart=null;selEnd=null;}
-  // Navigate calendar to show selStart's month
+  else if(type==='last-month'){
+    selStart=new Date(now.getFullYear(),now.getMonth()-1,1);
+    selEnd=new Date(now.getFullYear(),now.getMonth(),0);
+  }
   if(selStart){calYear=selStart.getFullYear();calMonth=selStart.getMonth();}
   renderCalGrid();
-  updateCalLabel();
-  closeCal();
+  closeCalCard();
   renderDashboard();
 }
 
+/* ── Update trigger label ── */
 function updateCalLabel(){
-  const lbl=document.getElementById('calLabel');
-  if(!selStart&&!selEnd){lbl.textContent='All Dates';return;}
+  const lbl=document.getElementById('calRangeLabel');
+  if(!selStart&&!selEnd){ lbl.textContent='All Dates'; return; }
   const fmt=d=>`${d.getDate()} ${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
   if(selStart&&selEnd){
-    if(selStart.getTime()===selEnd.getTime())lbl.textContent=fmt(selStart);
-    else lbl.textContent=`${fmt(selStart)} — ${fmt(selEnd)}`;
+    lbl.textContent=selStart.getTime()===selEnd.getTime()?fmt(selStart):`${fmt(selStart)} — ${fmt(selEnd)}`;
   } else if(selStart){
-    lbl.textContent=`From ${fmt(selStart)}`;
+    lbl.textContent=selPickingEnd?`From ${fmt(selStart)}...`:fmt(selStart);
   }
 }
 
-function updateCalSelectedInfo(){
-  const info=document.getElementById('calSelInfo');
-  const txt=document.getElementById('calSelText');
+/* ── Highlight active quick button ── */
+function updateCalQuickBtns(){
+  ['cq-all','cq-today','cq-yesterday','cq-week','cq-month','cq-lmonth']
+    .forEach(id=>document.getElementById(id)?.classList.remove('active'));
+  if(!selStart&&!selEnd){ document.getElementById('cq-all')?.classList.add('active'); return; }
+  const now=new Date(); now.setHours(0,0,0,0);
+  const fmt=d=>d.toDateString();
+  const yesterday=new Date(now); yesterday.setDate(now.getDate()-1);
+  const weekStart=new Date(now); weekStart.setDate(now.getDate()-(now.getDay()===0?6:now.getDay()-1));
+  const mStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const mEnd=new Date(now.getFullYear(),now.getMonth()+1,0);
+  const lmStart=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const lmEnd=new Date(now.getFullYear(),now.getMonth(),0);
   if(selStart&&selEnd){
-    const fmt=d=>`${d.getDate()} ${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
-    const diff=Math.round((selEnd-selStart)/(1000*60*60*24))+1;
-    txt.textContent=`${fmt(selStart)} → ${fmt(selEnd)}  (${diff} day${diff>1?'s':''})`;
-    info.classList.add('visible');
-  } else if(selStart&&selPickingEnd){
-    txt.textContent='Click an end date to complete the range';
-    info.classList.add('visible');
-  } else {
-    info.classList.remove('visible');
+    if(fmt(selStart)===fmt(now)&&fmt(selEnd)===fmt(now)) { document.getElementById('cq-today')?.classList.add('active'); return; }
+    if(fmt(selStart)===fmt(yesterday)&&fmt(selEnd)===fmt(yesterday)) { document.getElementById('cq-yesterday')?.classList.add('active'); return; }
+    if(fmt(selStart)===fmt(weekStart)&&fmt(selEnd)===fmt(now)) { document.getElementById('cq-week')?.classList.add('active'); return; }
+    if(fmt(selStart)===fmt(mStart)&&fmt(selEnd)===fmt(mEnd)) { document.getElementById('cq-month')?.classList.add('active'); return; }
+    if(fmt(selStart)===fmt(lmStart)&&fmt(selEnd)===fmt(lmEnd)) { document.getElementById('cq-lmonth')?.classList.add('active'); return; }
   }
 }
 
-function updateQuickBtnStates(){
-  ['qToday','qWeek','qMonth','qAll'].forEach(id=>document.getElementById(id)?.classList.remove('active'));
-  if(!selStart&&!selEnd){document.getElementById('qAll')?.classList.add('active');return;}
-  const now=new Date();now.setHours(0,0,0,0);
-  if(selStart&&selEnd){
-    if(selStart.getTime()===now.getTime()&&selEnd.getTime()===now.getTime()){document.getElementById('qToday')?.classList.add('active');return;}
-    const dow=now.getDay()===0?6:now.getDay()-1;
-    const wkStart=new Date(now);wkStart.setDate(now.getDate()-dow);
-    if(selStart.getTime()===wkStart.getTime()&&selEnd.getTime()===now.getTime()){document.getElementById('qWeek')?.classList.add('active');return;}
-    const mStart=new Date(now.getFullYear(),now.getMonth(),1);
-    const mEnd=new Date(now.getFullYear(),now.getMonth()+1,0);
-    if(selStart.getTime()===mStart.getTime()&&selEnd.getTime()===mEnd.getTime()){document.getElementById('qMonth')?.classList.add('active');return;}
-  }
-}
+
 
 /* ══════════════════════════
    LOADING SCREEN
@@ -704,9 +693,6 @@ function setStatus(type,html){
    BOOT
 ══════════════════════════ */
 window.addEventListener('DOMContentLoaded',()=>{
-  // Detach calendar dropdown from its animated parent and re-attach to <body>
-  // so position:fixed truly escapes every stacking context (animation, transform, etc.)
-  document.body.appendChild(document.getElementById('calDropdown'));
   lsStart();
   fetchData();
 });
@@ -719,35 +705,47 @@ function fetchData(){
     download:true,header:true,skipEmptyLines:true,transformHeader:h=>h.trim(),
     complete(res){
       clearTimeout(to);
-      if(res.data&&res.data.length){
-        const headers=Object.keys(res.data[0]);
-        cycleTimeCol=detectCTCol(headers);plannedDTCol=detectPlannedDTCol(headers);
-        dataDatesSet=new Set();
-        dashboardData=res.data.filter(r=>r['Date']).map(row=>{
-          const pts=row['Date'].split('-');
-          if(pts.length===3){
-            const y=parseInt(pts[0].trim()),mo=parseInt(pts[1].trim())-1,d=parseInt(pts[2].trim());
-            row._year=pts[0].trim();row._month=MONTH_SHORT[mo]||'Unknown';row._day=pts[2].trim().padStart(2,'0');
-            row._dateObj=new Date(y,mo,d);row._dateObj.setHours(0,0,0,0);
-            dataDatesSet.add(`${pts[0].trim()}-${pts[1].trim().padStart(2,'0')}-${pts[2].trim().padStart(2,'0')}`);
-          } else {
-            const dt=new Date(row['Date']);
-            if(!isNaN(dt)){
-              row._year=dt.getFullYear().toString();row._month=MONTH_SHORT[dt.getMonth()];row._day=dt.getDate().toString().padStart(2,'0');
-              row._dateObj=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());row._dateObj.setHours(0,0,0,0);
-              dataDatesSet.add(`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`);
+      try{
+        if(res.data&&res.data.length){
+          const headers=Object.keys(res.data[0]);
+          cycleTimeCol=detectCTCol(headers);plannedDTCol=detectPlannedDTCol(headers);
+          dataDatesSet=new Set();
+          dashboardData=res.data.filter(r=>r['Date']).map(row=>{
+            const pts=row['Date'].split('-');
+            if(pts.length===3){
+              const y=parseInt(pts[0].trim()),mo=parseInt(pts[1].trim())-1,d=parseInt(pts[2].trim());
+              row._year=pts[0].trim();row._month=MONTH_SHORT[mo]||'Unknown';row._day=pts[2].trim().padStart(2,'0');
+              row._dateObj=new Date(y,mo,d);row._dateObj.setHours(0,0,0,0);
+              dataDatesSet.add(`${pts[0].trim()}-${pts[1].trim().padStart(2,'0')}-${pts[2].trim().padStart(2,'0')}`);
+            } else {
+              const dt=new Date(row['Date']);
+              if(!isNaN(dt)){
+                row._year=dt.getFullYear().toString();row._month=MONTH_SHORT[dt.getMonth()];row._day=dt.getDate().toString().padStart(2,'0');
+                row._dateObj=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());row._dateObj.setHours(0,0,0,0);
+                dataDatesSet.add(`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`);
+              }
             }
+            return row;
+          });
+          const allTs=dashboardData.filter(r=>r._dateObj).map(r=>r._dateObj.getTime());
+          if(allTs.length){
+            const latestTs=allTs.reduce((a,b)=>a>b?a:b);
+            const latest=new Date(latestTs);
+            calYear=latest.getFullYear(); calMonth=latest.getMonth();
           }
-          return row;
-        });
-        // Navigate calendar to most recent data month
-        const allTs=dashboardData.filter(r=>r._dateObj).map(r=>r._dateObj.getTime());
-        if(allTs.length){const latest=new Date(Math.max(...allTs));calYear=latest.getFullYear();calMonth=latest.getMonth();}
-        setStatus('success','<span style="position:relative;width:8px;height:8px;border-radius:50%;background:#16A34A;display:inline-block;flex-shrink:0;"></span> Live Feed Active');
-        buildFilters();initCharts();renderDashboard();lsHide();
+          setStatus('success','<span style="position:relative;width:8px;height:8px;border-radius:50%;background:#16A34A;display:inline-block;flex-shrink:0;"></span> Live Feed Active');
+          buildFilters();
+          if(!trendInst)initCharts();  // only init once; refresh reuses existing instances
+          renderDashboard();
+        }
+      }catch(err){
+        console.error('Dashboard render error:',err);
+        setStatus('error','<i class="fa-solid fa-circle-xmark"></i> Render Error');
+      }finally{
+        lsHide(); // always hide loading screen regardless of success or error
       }
     },
-    error(){clearTimeout(to);setStatus('error','<i class="fa-solid fa-circle-xmark"></i> Feed Blocked');lsSet(100,'<span style="color:#9F1239;">Network error</span>');setTimeout(lsHide,1800);}
+    error(){clearTimeout(to);setStatus('error','<i class="fa-solid fa-circle-xmark"></i> Feed Blocked');lsSet(100,'<span style="color:#9F1239;">Network error — check CSV URL</span>');setTimeout(lsHide,1800);}
   });
 }
 
@@ -763,11 +761,12 @@ function buildFilters(){
 }
 
 function resetFilters(){
-  selStart=null;selEnd=null;selPickingEnd=false;hoverDate=null;
+  selStart=null; selEnd=null; selPickingEnd=false;
+  if(calCardOpen) closeCalCard();
   updateCalLabel();
+  updateCalQuickBtns();
   document.getElementById('filterShift').value='All';
   document.getElementById('tableSearch').value='';
-  if(calOpen)closeCal();
   renderDashboard();
 }
 
@@ -790,58 +789,12 @@ function renderDashboard(){
    CARDS + PRODUCT TABLE
 ══════════════════════════ */
 function updateCards(records){
-  const sups=new Set();
-  const macMap=new Map(); // mac → {products:Set, supervisors:Set, ctByProduct:Map}
+  const macSet=new Set();
   records.forEach(row=>{
-    const mac=row['Machine']?.trim(),sup=row['Supervisor Name']?.trim(),pro=row['Product Criteria']?.trim();
-    if(sup)sups.add(sup);
-    if(mac&&mac!=='NaN'){
-      if(!macMap.has(mac))macMap.set(mac,{products:new Set(),supervisors:new Set(),ctByProduct:new Map()});
-      const md=macMap.get(mac);
-      if(pro){
-        md.products.add(pro);
-        let ctRaw=cycleTimeCol?row[cycleTimeCol]:null;
-        if(!ctRaw||ctRaw.toString().trim()===''||ctRaw.toString().trim()==='0'){
-          for(let k of Object.keys(row)){if(k.toLowerCase().includes('cycle')&&k.toLowerCase().includes('time')){ctRaw=row[k];break;}}
-        }
-        const ctVal=cleanNum(ctRaw);
-        if(ctVal>0){if(!md.ctByProduct.has(pro))md.ctByProduct.set(pro,new Set());md.ctByProduct.get(pro).add(ctVal);}
-      }
-      if(sup)md.supervisors.add(sup);
-    }
+    const mac=row['Machine']?.trim();
+    if(mac&&mac!=='NaN')macSet.add(mac);
   });
-  document.getElementById('cardMachines').textContent=macMap.size;
-  document.getElementById('cardSupervisors').textContent=sups.size;
-  const tbody=document.getElementById('productDetailBody'),cntEl=document.getElementById('productDetailCount');
-  tbody.innerHTML='';
-  if(!macMap.size){
-    tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;"><i class="fa-solid fa-folder-open" style="font-size:18px;display:block;margin-bottom:6px;color:#D1D5DB;"></i>No data matches the selected filters.</td></tr>`;
-    cntEl.textContent='0';return;
-  }
-  cntEl.textContent=macMap.size;
-  Array.from(macMap.keys()).sort().forEach(mac=>{
-    const md=macMap.get(mac);
-    const prodHtml=Array.from(md.products).sort().join(', ')||'<span style="color:#9CA3AF;">—</span>';
-    const supHtml=Array.from(md.supervisors).sort().join(', ')||'<span style="color:#9CA3AF;">—</span>';
-    let ctHtml='';
-    md.ctByProduct.forEach(ctSet=>Array.from(ctSet).sort((a,b)=>a-b).forEach(v=>{ctHtml+=`<span class="tag-ct">${v}s</span>`;}));
-    if(!ctHtml){
-      const fb=new Set();
-      records.forEach(row=>{
-        if((row['Machine']||'').trim()!==mac)return;
-        for(let k of Object.keys(row)){if(k.toLowerCase().includes('cycle')&&k.toLowerCase().includes('time')){const v=cleanNum(row[k]);if(v>0)fb.add(v);}}
-      });
-      if(fb.size)Array.from(fb).sort((a,b)=>a-b).forEach(v=>{ctHtml+=`<span class="tag-ct">${v}s</span>`;});
-    }
-    if(!ctHtml)ctHtml='<span style="color:#D1D5DB;font-size:11px;font-weight:500;">Not in dataset</span>';
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><span class="tag-machine">${mac}</span></td>
-      <td style="font-size:12.5px;font-weight:500;color:#1F2937;">${prodHtml}</td>
-      <td style="color:#374151;font-weight:500;">${supHtml}</td>
-      <td>${ctHtml}</td>`;
-    tbody.appendChild(tr);
-  });
+  document.getElementById('cardMachines').textContent=macSet.size;
 }
 
 /* ══════════════════════════
@@ -989,10 +942,14 @@ function refreshData(){
   const btn=document.getElementById('btnRefresh');
   btn.disabled=true;btn.classList.add('spinning');
   dashboardData=[];dataDatesSet=new Set();
+  // Destroy existing chart instances so initCharts() can re-create them cleanly
+  if(trendInst){trendInst.destroy();trendInst=null;}
+  if(downtimeInst){downtimeInst.destroy();downtimeInst=null;}
+  if(productInst){productInst.destroy();productInst=null;}
   ['filterShift'].forEach(id=>{const s=document.getElementById(id);while(s.options.length>1)s.remove(1);});
   document.getElementById('productionTableBody').innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px;color:#9CA3AF;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:18px;display:block;margin-bottom:8px;color:#A5B4FC;"></i>Refreshing data...</td></tr>`;
   fetchData();
-  setTimeout(()=>{btn.disabled=false;btn.classList.remove('spinning');},3000);
+  setTimeout(()=>{btn.disabled=false;btn.classList.remove('spinning');},4000);
 }
 </script>
 </body>
