@@ -66,9 +66,9 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 .header-subtitle{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#9CA3AF;margin-top:1px;}
 
 /* ═══════ CARDS ═══════ */
-.card{background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:0 1px 3px rgba(17,24,39,.06),0 1px 2px rgba(17,24,39,.04);transition:box-shadow .2s,transform .2s,border-color .2s;}
+.card,.card-flat{background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:0 1px 3px rgba(17,24,39,.06),0 1px 2px rgba(17,24,39,.04);}
+.card{transition:box-shadow .2s,transform .2s,border-color .2s;}
 .card:hover{box-shadow:0 6px 20px rgba(99,102,241,.12),0 2px 6px rgba(17,24,39,.06);border-color:#C7D2FE;transform:translateY(-2px);}
-.card-flat{background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:0 1px 3px rgba(17,24,39,.06),0 1px 2px rgba(17,24,39,.04);}
 .accent-indigo{border-top:3px solid #6366F1;}.accent-blue{border-top:3px solid #3B82F6;}
 .accent-amber{border-top:3px solid #F59E0B;}.accent-teal{border-top:3px solid #14B8A6;}.accent-orange{border-top:3px solid #F97316;}
 
@@ -84,9 +84,9 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 /* ═══════ ICON BADGES ═══════ */
 .ib{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
 .ib-indigo{background:#EEF2FF;color:#4338CA;}.ib-blue{background:#EFF6FF;color:#1D4ED8;}
-.ib-violet{background:#F5F3FF;color:#6D28D9;}.ib-emerald{background:#ECFDF5;color:#065F46;}
-.ib-amber{background:#FFFBEB;color:#92400E;}.ib-rose{background:#FFF1F2;color:#9F1239;}
-.ib-teal{background:#F0FDFA;color:#0F766E;}.ib-orange{background:#FFF7ED;color:#9A3412;}
+.ib-emerald{background:#ECFDF5;color:#065F46;}.ib-amber{background:#FFFBEB;color:#92400E;}
+.ib-rose{background:#FFF1F2;color:#9F1239;}.ib-teal{background:#F0FDFA;color:#0F766E;}
+.ib-orange{background:#FFF7ED;color:#9A3412;}
 
 /* ═══════ PROGRESS ═══════ */
 .prog-track{width:100%;height:5px;background:#E5E7EB;border-radius:99px;overflow:hidden;margin-top:10px;}
@@ -216,8 +216,6 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 
 /* ═══════ TAGS & BADGES ═══════ */
 .tag-machine{display:inline-block;background:#EEF2FF;border:1px solid #C7D2FE;color:#3730A3;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700;margin:1px;}
-.tag-ct{display:inline-block;background:#ECFEFF;border:1px solid #A5F3FC;color:#0E7490;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;margin:1px;}
-.badge-prod{background:#EEF2FF;color:#3730A3;border:1px solid #C7D2FE;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;}
 .oee-good{background:#F0FDF4;color:#166534;border:1px solid #86EFAC;}
 .oee-warn{background:#FEFCE8;color:#854D0E;border:1px solid #FDE047;}
 .oee-bad{background:#FFF1F2;color:#9F1239;border:1px solid #FDA4AF;}
@@ -245,12 +243,98 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 .fu{animation:fadeUp .4s ease both;}
 .fu-1{animation-delay:.06s;opacity:0;}.fu-2{animation-delay:.12s;opacity:0;}
 .fu-3{animation-delay:.18s;opacity:0;}.fu-4{animation-delay:.24s;opacity:0;}
+
+/* ═══════ LANDING SCREEN ═══════ */
+#landingScreen{
+  position:fixed;inset:0;z-index:99999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#ffffff;
+  transition:opacity .55s ease,visibility .55s ease;
+}
+#landingScreen.hide{opacity:0;visibility:hidden;pointer-events:none;}
+#landingScreen::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 10% 10%,rgba(199,210,254,.55) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 45% at 90% 85%,rgba(167,243,208,.45) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 35% at 80% 15%,rgba(254,215,170,.35) 0%,transparent 55%);
+}
+#landingScreen::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(99,102,241,.07) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.ls-brand{display:flex;align-items:center;gap:14px;margin-bottom:12px;position:relative;z-index:2;animation:lsUp .6s cubic-bezier(.22,1,.36,1) both;}
+.ls-brand-logo{width:54px;height:54px;border-radius:16px;background:linear-gradient(145deg,#6366F1,#818CF8);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(99,102,241,.3);}
+.ls-brand-name{font-size:20px;font-weight:900;letter-spacing:-.03em;color:#111827;}
+.ls-brand-sub{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#9CA3AF;margin-top:2px;}
+.ls-tagline{font-size:13px;font-weight:500;color:#9CA3AF;margin-bottom:40px;position:relative;z-index:2;animation:lsUp .6s .08s cubic-bezier(.22,1,.36,1) both;}
+.ls-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;position:relative;z-index:2;}
+.ls-card{
+  width:272px;background:#fff;border:1.5px solid #E5E7EB;border-radius:20px;
+  padding:28px 24px;cursor:pointer;position:relative;overflow:hidden;
+  box-shadow:0 2px 8px rgba(17,24,39,.07);
+  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s,border-color .22s;
+}
+.ls-card:hover{transform:translateY(-7px);box-shadow:0 20px 48px rgba(17,24,39,.13);}
+.ls-card:active{transform:translateY(-2px) scale(.98);}
+.ls-card::after{content:'';position:absolute;inset:0;opacity:0;border-radius:20px;transition:opacity .22s;}
+.ls-card-green{border-top:3px solid #10B981;animation:lsUp .6s .15s cubic-bezier(.22,1,.36,1) both;}
+.ls-card-indigo{border-top:3px solid #6366F1;animation:lsUp .6s .25s cubic-bezier(.22,1,.36,1) both;}
+.ls-card-green::after{background:linear-gradient(145deg,rgba(16,185,129,.05),transparent);}
+.ls-card-indigo::after{background:linear-gradient(145deg,rgba(99,102,241,.05),transparent);}
+.ls-card:hover::after{opacity:1;}
+.ls-badge{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:18px;}
+.ls-badge-green{background:#ECFDF5;color:#059669;}
+.ls-badge-indigo{background:#EEF2FF;color:#4338CA;}
+.ls-card-title{font-size:17px;font-weight:800;color:#111827;letter-spacing:-.02em;margin-bottom:8px;position:relative;z-index:1;}
+.ls-card-desc{font-size:12.5px;font-weight:500;color:#6B7280;line-height:1.65;margin-bottom:22px;position:relative;z-index:1;}
+.ls-card-cta{display:inline-flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;padding:8px 16px;border-radius:10px;border:none;cursor:pointer;position:relative;z-index:1;transition:gap .2s;}
+.ls-card:hover .ls-card-cta{gap:11px;}
+.ls-cta-green{background:#ECFDF5;color:#059669;}
+.ls-cta-indigo{background:#EEF2FF;color:#4338CA;}
+.ls-note{position:relative;z-index:2;margin-top:40px;font-size:11px;font-weight:500;color:#D1D5DB;animation:lsUp .6s .35s cubic-bezier(.22,1,.36,1) both;}
+@keyframes lsUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
 
+<!-- ══════════ LANDING SCREEN ══════════ -->
+<div id="landingScreen">
+  <!-- Brand -->
+  <div class="ls-brand">
+    <div class="ls-brand-logo"><i class="fa-solid fa-industry" style="color:#fff;font-size:22px;"></i></div>
+    <div>
+      <div class="ls-brand-name">AKIJ LIGHT ENGINEERING LTD</div>
+      <div class="ls-brand-sub">Injection Molding Division</div>
+    </div>
+  </div>
+  <div class="ls-tagline">Select your workspace to continue</div>
+
+  <!-- Choice cards -->
+  <div class="ls-cards">
+    <!-- Production & NPT Entry -->
+    <div class="ls-card ls-card-green" onclick="openEntry()">
+      <div class="ls-badge ls-badge-green"><i class="fa-solid fa-clipboard-list"></i></div>
+      <div class="ls-card-title">Production &amp; NPT Entry</div>
+      <div class="ls-card-desc">Submit daily production records, downtime logs and NPT data directly to the central database.</div>
+      <button class="ls-card-cta ls-cta-green">Open Form &nbsp;<i class="fa-solid fa-arrow-right" style="font-size:10px;"></i></button>
+    </div>
+
+    <!-- OEE Analytics Engine -->
+    <div class="ls-card ls-card-indigo" onclick="openDashboard()">
+      <div class="ls-badge ls-badge-indigo"><i class="fa-solid fa-chart-line"></i></div>
+      <div class="ls-card-title">OEE Analytics Engine</div>
+      <div class="ls-card-desc">Live OEE metrics, trend analysis, downtime breakdowns and full production performance dashboard.</div>
+      <button class="ls-card-cta ls-cta-indigo">Open Dashboard &nbsp;<i class="fa-solid fa-arrow-right" style="font-size:10px;"></i></button>
+    </div>
+  </div>
+
+  <div class="ls-note">&copy; 2026 Akij Light Engineering Ltd &nbsp;&middot;&nbsp; Injection Molding Division</div>
+</div>
+
 <!-- ══════════ LOADING SCREEN ══════════ -->
-<div id="loadingScreen">
+<div id="loadingScreen" style="display:none;">
   <div class="ls-logo-wrap">
     <div class="ls-logo-card"><i class="fa-solid fa-industry" style="font-size:32px;color:#fff;"></i></div>
     <div class="ls-spin-ring"></div><div class="ls-spin-ring2"></div>
@@ -267,7 +351,12 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 <!-- ══════════ HEADER ══════════ -->
 <header>
   <div class="max-w-7xl mx-auto px-5 py-3" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-    <div style="display:flex;align-items:center;gap:12px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <!-- Back button -->
+      <button onclick="goToLanding()" title="Back to Home" style="display:inline-flex;align-items:center;gap:6px;background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:9px;color:#6B7280;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;padding:6px 12px;cursor:pointer;white-space:nowrap;transition:all .15s;" onmouseover="this.style.background='#EEF2FF';this.style.borderColor='#C7D2FE';this.style.color='#4338CA'" onmouseout="this.style.background='#F9FAFB';this.style.borderColor='#E5E7EB';this.style.color='#6B7280'">
+        <i class="fa-solid fa-arrow-left" style="font-size:10px;"></i>Home
+      </button>
+      <div style="width:1px;height:20px;background:#E5E7EB;"></div>
       <div class="header-logo-box"><i class="fa-solid fa-industry" style="color:#fff;font-size:17px;"></i></div>
       <div>
         <div class="header-company">AKIJ LIGHT ENGINEERING LTD</div>
@@ -693,9 +782,42 @@ function setStatus(type,html){
    BOOT
 ══════════════════════════ */
 window.addEventListener('DOMContentLoaded',()=>{
-  lsStart();
-  fetchData();
+  // Just show the landing screen — do NOT start loading data yet
 });
+
+function openDashboard(){
+  const landing=document.getElementById('landingScreen');
+  const loadScr=document.getElementById('loadingScreen');
+  landing.classList.add('hide');
+  setTimeout(()=>{
+    landing.style.display='none';
+    if(dashboardData.length){
+      // Data already loaded — no need to re-fetch, just show dashboard directly
+      return;
+    }
+    loadScr.style.display='flex';
+    lsStart();
+    fetchData();
+  },550);
+}
+
+function goToLanding(){
+  const landing=document.getElementById('landingScreen');
+  landing.style.display='flex';
+  landing.style.opacity='0';
+  landing.classList.remove('hide');
+  // Animate back in
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      landing.style.transition='opacity .4s ease';
+      landing.style.opacity='1';
+    });
+  });
+}
+
+function openEntry(){
+  window.open('https://script.google.com/a/macros/akijresource.com/s/AKfycbynbXvkuYf9t9gv-QnXiyy0Zu2NEFLbjiQZYelVe2kcJA7BGFDr7JnVKAcjDJ09DC83Ew/exec','_blank');
+}
 
 function fetchData(){
   const to=setTimeout(()=>{
