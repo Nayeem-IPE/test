@@ -311,11 +311,53 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 
 .ls-tagline{
   font-size:13.5px;font-weight:500;color:#6B7280;
-  margin-bottom:40px;position:relative;z-index:2;letter-spacing:.01em;
+  margin-bottom:28px;position:relative;z-index:2;letter-spacing:.01em;
   animation:lsUp .65s .08s cubic-bezier(.22,1,.36,1) both;
 }
 
-/* ── Cards ── */
+/* ── Live Clock Widget ── */
+.ls-clock-wrap{
+  position:relative;z-index:2;
+  display:inline-flex;flex-direction:column;align-items:center;
+  background:rgba(255,255,255,.65);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1.5px solid rgba(255,255,255,.95);
+  border-radius:20px;padding:16px 40px;margin-bottom:32px;
+  box-shadow:0 4px 24px rgba(99,102,241,.12),0 1px 4px rgba(17,24,39,.05);
+  animation:lsUp .65s .12s cubic-bezier(.22,1,.36,1) both;
+}
+.ls-live-pill{
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  display:inline-flex;align-items:center;gap:5px;
+  background:linear-gradient(135deg,#059669,#10B981);
+  color:#fff;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 10px;border-radius:99px;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(16,185,129,.4);
+}
+.ls-live-dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:liveBlink 1.2s ease-in-out infinite;}
+@keyframes liveBlink{0%,100%{opacity:1;}50%{opacity:.25;}}
+.ls-clock-time{display:flex;align-items:baseline;line-height:1;}
+.ls-clock-hm{
+  font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:700;letter-spacing:-.01em;
+  background:linear-gradient(135deg,#4338CA,#6366F1);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.ls-clock-sep{
+  font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:700;
+  color:#C7D2FE;margin:0 2px;align-self:center;
+  animation:sepBlink 1s step-start infinite;
+}
+@keyframes sepBlink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.ls-clock-sec{
+  font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;margin-left:4px;
+  background:linear-gradient(135deg,#6366F1,#8B5CF6);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  align-self:flex-end;margin-bottom:4px;
+}
+.ls-clock-day{font-size:10.5px;font-weight:700;color:#A5B4FC;letter-spacing:.1em;text-transform:uppercase;margin-top:8px;text-align:center;}
+.ls-clock-date{font-size:12.5px;font-weight:600;color:#6B7280;margin-top:3px;letter-spacing:.02em;text-align:center;}
+
+
 .ls-cards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;position:relative;z-index:2;}
 
 .ls-card{
@@ -406,6 +448,18 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
   </div>
 
   <div class="ls-tagline">Select your workspace to continue</div>
+
+  <!-- Live Clock -->
+  <div class="ls-clock-wrap">
+    <div class="ls-live-pill"><div class="ls-live-dot"></div>Live</div>
+    <div class="ls-clock-time">
+      <span class="ls-clock-hm" id="lsClockHM">--:--</span>
+      <span class="ls-clock-sep">:</span>
+      <span class="ls-clock-sec" id="lsClockSec">--</span>
+    </div>
+    <div class="ls-clock-day" id="lsClockDay">———</div>
+    <div class="ls-clock-date" id="lsClockDate">—— ——————— ————</div>
+  </div>
 
   <!-- Choice cards -->
   <div class="ls-cards">
@@ -875,10 +929,26 @@ function setStatus(type,html){
 }
 
 /* ══════════════════════════
+   LIVE CLOCK
+══════════════════════════ */
+const DAYS_FULL  =['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function updateClock(){
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  document.getElementById('lsClockHM').textContent  = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  document.getElementById('lsClockSec').textContent = pad(now.getSeconds());
+  document.getElementById('lsClockDay').textContent = DAYS_FULL[now.getDay()];
+  document.getElementById('lsClockDate').textContent= `${now.getDate()} ${MONTHS_FULL[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+/* ══════════════════════════
    BOOT
 ══════════════════════════ */
 window.addEventListener('DOMContentLoaded',()=>{
-  // Just show the landing screen — do NOT start loading data yet
+  updateClock();
+  setInterval(updateClock,1000);
 });
 
 function openDashboard(){
@@ -914,7 +984,7 @@ function goToLanding(){
 }
 
 function openEntry(){
-  window.open('https://script.google.com/a/macros/akijresource.com/s/AKfycbwe9ByOtk0eUAXPNUP9EZLRuUq1l0sm-9nI_-cLaJKktxvGqVDmeXlonxRMyvnlYtyV5g/exec');
+  window.open('https://script.google.com/a/macros/akijresource.com/s/AKfycbynbXvkuYf9t9gv-QnXiyy0Zu2NEFLbjiQZYelVe2kcJA7BGFDr7JnVKAcjDJ09DC83Ew/exec','_blank');
 }
 
 function fetchData(){
