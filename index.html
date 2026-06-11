@@ -248,52 +248,138 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 #landingScreen{
   position:fixed;inset:0;z-index:99999;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:#ffffff;
+  background:linear-gradient(145deg,#EEF2FF 0%,#F5F3FF 30%,#ECFDF5 65%,#F0F4FF 100%);
   transition:opacity .55s ease,visibility .55s ease;
+  overflow:hidden;
 }
 #landingScreen.hide{opacity:0;visibility:hidden;pointer-events:none;}
-#landingScreen::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 60% 50% at 10% 10%,rgba(199,210,254,.55) 0%,transparent 55%),
-    radial-gradient(ellipse 50% 45% at 90% 85%,rgba(167,243,208,.45) 0%,transparent 55%),
-    radial-gradient(ellipse 40% 35% at 80% 15%,rgba(254,215,170,.35) 0%,transparent 55%);
+
+/* Animated blob layer */
+.ls-blobs{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.ls-blob{
+  position:absolute;border-radius:50%;filter:blur(72px);
+  animation:blobFloat 9s ease-in-out infinite alternate;
 }
-#landingScreen::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background-image:radial-gradient(rgba(99,102,241,.07) 1px,transparent 1px);
-  background-size:28px 28px;
+.ls-blob-1{width:520px;height:520px;background:rgba(99,102,241,.18);top:-160px;left:-160px;animation-delay:0s;}
+.ls-blob-2{width:440px;height:440px;background:rgba(16,185,129,.14);bottom:-120px;right:-120px;animation-delay:-3s;}
+.ls-blob-3{width:340px;height:340px;background:rgba(245,158,11,.1);top:30%;left:55%;animation-delay:-6s;}
+@keyframes blobFloat{
+  0%  {transform:translate(0,0)   scale(1);}
+  100%{transform:translate(24px,18px) scale(1.07);}
 }
-.ls-brand{display:flex;align-items:center;gap:14px;margin-bottom:12px;position:relative;z-index:2;animation:lsUp .6s cubic-bezier(.22,1,.36,1) both;}
-.ls-brand-logo{width:54px;height:54px;border-radius:16px;background:linear-gradient(145deg,#6366F1,#818CF8);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(99,102,241,.3);}
-.ls-brand-name{font-size:20px;font-weight:900;letter-spacing:-.03em;color:#111827;}
-.ls-brand-sub{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#9CA3AF;margin-top:2px;}
-.ls-tagline{font-size:13px;font-weight:500;color:#9CA3AF;margin-bottom:40px;position:relative;z-index:2;animation:lsUp .6s .08s cubic-bezier(.22,1,.36,1) both;}
-.ls-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;position:relative;z-index:2;}
+
+/* Dot grid */
+.ls-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(99,102,241,.09) 1px,transparent 1px);
+  background-size:30px 30px;
+}
+
+/* ── Brand block ── */
+.ls-brand{
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  margin-bottom:10px;position:relative;z-index:2;
+  animation:lsUp .65s cubic-bezier(.22,1,.36,1) both;
+}
+.ls-logo-ring{
+  width:76px;height:76px;border-radius:22px;
+  background:linear-gradient(145deg,#6366F1,#8B5CF6);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 12px 36px rgba(99,102,241,.35),0 2px 8px rgba(99,102,241,.2);
+  margin-bottom:20px;
+  animation:logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse{
+  0%,100%{box-shadow:0 12px 36px rgba(99,102,241,.35),0 2px 8px rgba(99,102,241,.2);}
+  50%    {box-shadow:0 16px 48px rgba(99,102,241,.50),0 4px 14px rgba(99,102,241,.3);}
+}
+.ls-company-name{
+  font-size:26px;font-weight:900;letter-spacing:-.035em;
+  background:linear-gradient(135deg,#4338CA 0%,#6366F1 40%,#8B5CF6 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-align:center;line-height:1.1;margin-bottom:6px;
+}
+.ls-company-div{
+  font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:#6B7280;margin-bottom:6px;
+}
+.ls-accent-line{
+  width:48px;height:3px;border-radius:99px;
+  background:linear-gradient(90deg,#6366F1,#8B5CF6);
+  margin:0 auto 28px;
+}
+
+.ls-tagline{
+  font-size:13.5px;font-weight:500;color:#6B7280;
+  margin-bottom:40px;position:relative;z-index:2;letter-spacing:.01em;
+  animation:lsUp .65s .08s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* ── Cards ── */
+.ls-cards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;position:relative;z-index:2;}
+
 .ls-card{
-  width:272px;background:#fff;border:1.5px solid #E5E7EB;border-radius:20px;
-  padding:28px 24px;cursor:pointer;position:relative;overflow:hidden;
-  box-shadow:0 2px 8px rgba(17,24,39,.07);
-  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s,border-color .22s;
+  width:268px;
+  background:rgba(255,255,255,.75);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1.5px solid rgba(255,255,255,.9);
+  border-radius:22px;padding:28px 24px;cursor:pointer;position:relative;overflow:hidden;
+  box-shadow:0 4px 20px rgba(17,24,39,.08),0 1px 4px rgba(17,24,39,.04);
+  transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s ease,border-color .25s ease;
 }
-.ls-card:hover{transform:translateY(-7px);box-shadow:0 20px 48px rgba(17,24,39,.13);}
-.ls-card:active{transform:translateY(-2px) scale(.98);}
-.ls-card::after{content:'';position:absolute;inset:0;opacity:0;border-radius:20px;transition:opacity .22s;}
-.ls-card-green{border-top:3px solid #10B981;animation:lsUp .6s .15s cubic-bezier(.22,1,.36,1) both;}
-.ls-card-indigo{border-top:3px solid #6366F1;animation:lsUp .6s .25s cubic-bezier(.22,1,.36,1) both;}
-.ls-card-green::after{background:linear-gradient(145deg,rgba(16,185,129,.05),transparent);}
-.ls-card-indigo::after{background:linear-gradient(145deg,rgba(99,102,241,.05),transparent);}
+.ls-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 24px 56px rgba(17,24,39,.14),0 4px 12px rgba(17,24,39,.06);
+}
+.ls-card:active{transform:translateY(-3px) scale(.98);}
+
+/* Shimmer overlay */
+.ls-card::before{
+  content:'';position:absolute;inset:0;border-radius:22px;
+  background:linear-gradient(135deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,0) 60%);
+  pointer-events:none;
+}
+/* Colour wash on hover */
+.ls-card::after{
+  content:'';position:absolute;inset:0;border-radius:22px;
+  opacity:0;transition:opacity .25s;pointer-events:none;
+}
+.ls-card-green{border-top:3px solid #10B981;animation:lsUp .65s .18s cubic-bezier(.22,1,.36,1) both;}
+.ls-card-green:hover{border-color:#6EE7B7;}
+.ls-card-green::after{background:radial-gradient(ellipse at 30% 0%,rgba(16,185,129,.08) 0%,transparent 70%);}
+.ls-card-indigo{border-top:3px solid #6366F1;animation:lsUp .65s .28s cubic-bezier(.22,1,.36,1) both;}
+.ls-card-indigo:hover{border-color:#A5B4FC;}
+.ls-card-indigo::after{background:radial-gradient(ellipse at 30% 0%,rgba(99,102,241,.09) 0%,transparent 70%);}
 .ls-card:hover::after{opacity:1;}
-.ls-badge{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:18px;}
-.ls-badge-green{background:#ECFDF5;color:#059669;}
-.ls-badge-indigo{background:#EEF2FF;color:#4338CA;}
-.ls-card-title{font-size:17px;font-weight:800;color:#111827;letter-spacing:-.02em;margin-bottom:8px;position:relative;z-index:1;}
+
+.ls-badge{
+  width:52px;height:52px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:18px;position:relative;z-index:1;
+}
+.ls-badge-green{background:linear-gradient(145deg,#D1FAE5,#A7F3D0);color:#059669;box-shadow:0 4px 12px rgba(16,185,129,.2);}
+.ls-badge-indigo{background:linear-gradient(145deg,#E0E7FF,#C7D2FE);color:#4338CA;box-shadow:0 4px 12px rgba(99,102,241,.2);}
+
+.ls-card-title{font-size:16.5px;font-weight:800;color:#111827;letter-spacing:-.02em;margin-bottom:8px;position:relative;z-index:1;}
 .ls-card-desc{font-size:12.5px;font-weight:500;color:#6B7280;line-height:1.65;margin-bottom:22px;position:relative;z-index:1;}
-.ls-card-cta{display:inline-flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;padding:8px 16px;border-radius:10px;border:none;cursor:pointer;position:relative;z-index:1;transition:gap .2s;}
+
+.ls-card-cta{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;
+  padding:9px 18px;border-radius:10px;border:none;cursor:pointer;
+  position:relative;z-index:1;transition:gap .2s ease,box-shadow .2s ease;
+}
 .ls-card:hover .ls-card-cta{gap:11px;}
-.ls-cta-green{background:#ECFDF5;color:#059669;}
-.ls-cta-indigo{background:#EEF2FF;color:#4338CA;}
-.ls-note{position:relative;z-index:2;margin-top:40px;font-size:11px;font-weight:500;color:#D1D5DB;animation:lsUp .6s .35s cubic-bezier(.22,1,.36,1) both;}
+.ls-cta-green{background:linear-gradient(135deg,#D1FAE5,#A7F3D0);color:#065F46;box-shadow:0 2px 8px rgba(16,185,129,.15);}
+.ls-cta-indigo{background:linear-gradient(135deg,#E0E7FF,#C7D2FE);color:#3730A3;box-shadow:0 2px 8px rgba(99,102,241,.15);}
+.ls-card:hover .ls-cta-green{box-shadow:0 4px 14px rgba(16,185,129,.28);}
+.ls-card:hover .ls-cta-indigo{box-shadow:0 4px 14px rgba(99,102,241,.28);}
+
+.ls-note{
+  position:relative;z-index:2;margin-top:38px;
+  font-size:11px;font-weight:500;color:#C7D2FE;
+  animation:lsUp .65s .38s cubic-bezier(.22,1,.36,1) both;
+}
 @keyframes lsUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
@@ -301,14 +387,24 @@ header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid 
 
 <!-- ══════════ LANDING SCREEN ══════════ -->
 <div id="landingScreen">
+  <!-- Animated blobs -->
+  <div class="ls-blobs">
+    <div class="ls-blob ls-blob-1"></div>
+    <div class="ls-blob ls-blob-2"></div>
+    <div class="ls-blob ls-blob-3"></div>
+  </div>
+  <div class="ls-grid"></div>
+
   <!-- Brand -->
   <div class="ls-brand">
-    <div class="ls-brand-logo"><i class="fa-solid fa-industry" style="color:#fff;font-size:22px;"></i></div>
-    <div>
-      <div class="ls-brand-name">AKIJ LIGHT ENGINEERING LTD</div>
-      <div class="ls-brand-sub">Injection Molding Division</div>
+    <div class="ls-logo-ring">
+      <i class="fa-solid fa-industry" style="color:#fff;font-size:28px;"></i>
     </div>
+    <div class="ls-company-name">AKIJ LIGHT ENGINEERING LTD</div>
+    <div class="ls-company-div">Injection Molding Division</div>
+    <div class="ls-accent-line"></div>
   </div>
+
   <div class="ls-tagline">Select your workspace to continue</div>
 
   <!-- Choice cards -->
@@ -788,16 +884,18 @@ window.addEventListener('DOMContentLoaded',()=>{
 function openDashboard(){
   const landing=document.getElementById('landingScreen');
   const loadScr=document.getElementById('loadingScreen');
+  // Show loading screen FIRST — it sits at z-9999 behind the landing (z-99999)
+  // so as the landing fades, the loading screen is already covering the empty dashboard
+  loadScr.style.display='flex';
   landing.classList.add('hide');
   setTimeout(()=>{
     landing.style.display='none';
     if(dashboardData.length){
-      // Data already loaded — no need to re-fetch, just show dashboard directly
-      return;
+      lsHide(); // data already cached — skip straight through
+    } else {
+      lsStart();
+      fetchData();
     }
-    loadScr.style.display='flex';
-    lsStart();
-    fetchData();
   },550);
 }
 
